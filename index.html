@@ -1,0 +1,2918 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIFA World Cup 2026 — Прогноз сітки</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #07051a;
+  --bg2: #0f0a2e;
+  --card: #141030;
+  --card2: #1c1640;
+  --card-hover: #221c4d;
+  --accent: #00f0b5;
+  --accent2: #7b5cff;
+  --magenta: #ff2d95;
+  --gold: #ffd24a;
+  --gold-dim: #c9a227;
+  --text: #f4f6ff;
+  --muted: #9aa3c7;
+  --border: rgba(123,92,255,.25);
+  --glow: rgba(0,240,181,.15);
+  --done: rgba(0,240,181,.08);
+  --pending: #1a1540;
+  --radius: 14px;
+  --shadow: 0 8px 32px rgba(0,0,0,.45);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,92,255,.22), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(255,45,149,.08), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 80%, rgba(0,240,181,.06), transparent),
+    linear-gradient(180deg, #07051a 0%, #0c0830 50%, #07051a 100%);
+}
+
+/* ── Header ── */
+header.hero {
+  position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(135deg, rgba(15,10,46,.97), rgba(20,16,48,.97));
+  backdrop-filter: blur(16px);
+  border-bottom: 2px solid transparent;
+  border-image: linear-gradient(90deg, var(--magenta), var(--gold), var(--accent)) 1;
+  box-shadow: 0 4px 40px rgba(0,0,0,.5);
+}
+
+.header-inner { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 1rem; }
+
+.header-top { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; justify-content: space-between; }
+
+.brand { display: flex; align-items: center; gap: 1rem; }
+
+.brand-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), #ff8c00);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; box-shadow: 0 0 24px rgba(255,210,74,.35);
+}
+
+.brand h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.1rem; font-weight: 400; letter-spacing: .06em; line-height: 1;
+}
+
+.brand h1 span {
+  background: linear-gradient(90deg, var(--gold), #fff8dc);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.brand .sub {
+  color: var(--muted); font-size: .88rem; margin-top: .15rem; letter-spacing: .02em;
+}
+
+.brand .sub strong { color: var(--accent); font-weight: 600; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: .55rem; align-items: center; }
+
+input[type=text] {
+  background: rgba(255,255,255,.06); border: 1px solid var(--border);
+  color: var(--text); padding: .55rem .85rem; border-radius: 10px;
+  min-width: 180px; font-size: .92rem; transition: .2s;
+}
+
+input[type=text]:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+button, .tab {
+  background: rgba(255,255,255,.06); border: 1px solid var(--border);
+  color: var(--text); padding: .55rem 1rem; border-radius: 10px;
+  cursor: pointer; font-size: .9rem; font-family: inherit; font-weight: 500;
+  transition: .18s;
+}
+
+button:hover, .tab:hover {
+  background: var(--card-hover); border-color: var(--accent2);
+  transform: translateY(-1px);
+}
+
+button.primary {
+  background: linear-gradient(135deg, var(--accent2), #5a3fd4);
+  border-color: transparent; font-weight: 600;
+}
+
+button.gold {
+  background: linear-gradient(135deg, var(--gold), #ff9f1c);
+  border-color: transparent; color: #1a0a2e; font-weight: 700;
+}
+
+.tabs {
+  display: flex; gap: .5rem; margin-top: 1.1rem; flex-wrap: wrap;
+  padding-top: .25rem;
+}
+
+.tab {
+  padding: .6rem 1.2rem; border-radius: 999px; font-weight: 600;
+  text-transform: uppercase; font-size: .78rem; letter-spacing: .06em;
+}
+
+.tab.active {
+  background: linear-gradient(135deg, var(--accent2), var(--magenta));
+  border-color: transparent; color: #fff;
+  box-shadow: 0 4px 20px rgba(123,92,255,.4);
+}
+
+/* ── Main ── */
+main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow-anchor: none; }
+
+.panel { display: none; animation: fadeIn .3s ease; }
+.panel.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── Flags ── */
+.flag {
+  display: inline-block; object-fit: cover; border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.4); vertical-align: middle; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.2);
+}
+
+.flag-sm { width: 22px; height: 16px; }
+.flag-md { width: 28px; height: 21px; }
+.flag-lg { width: 40px; height: 30px; }
+
+.flag-fallback {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--card2); border: 1px solid var(--border); border-radius: 3px;
+  font-size: .55rem; font-weight: 700; color: var(--muted);
+  vertical-align: middle; flex-shrink: 0;
+}
+.flag-fallback.flag-sm { width: 22px; height: 16px; }
+.flag-fallback.flag-md { width: 28px; height: 21px; }
+.flag-fallback.flag-lg { width: 40px; height: 30px; }
+
+.team-cell { display: flex; align-items: center; gap: .45rem; min-width: 0; }
+.team-cell .team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+.team-cell.away { justify-content: flex-end; text-align: right; }
+.team-cell.away .team-name { order: -1; }
+
+.team-inline { display: inline-flex; align-items: center; gap: .35rem; vertical-align: middle; }
+
+/* ── Scoreboard hero ── */
+.scoreboard {
+  background: linear-gradient(135deg, rgba(28,22,64,.9), rgba(20,16,48,.95));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+  display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+
+.scoreboard::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--magenta), var(--accent2), var(--accent));
+}
+
+.scoreboard .score-label {
+  font-size: .82rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .1em; font-weight: 600;
+}
+
+.scoreboard .total {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem; font-weight: 400; color: var(--gold); line-height: 1;
+  text-shadow: 0 0 30px rgba(255,210,74,.3);
+}
+
+.scoreboard .breakdown { font-size: .85rem; color: var(--muted); margin-top: .4rem; max-width: 600px; }
+.scoreboard .pts-legend { font-size: .72rem; color: var(--muted); margin-top: .35rem; }
+
+/* ── Cards & panels ── */
+.progress-bar, .ticket-panel, .third-place-info, .summary-block {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+
+.progress-bar { padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+.progress-track { height: 10px; background: var(--pending); border-radius: 5px; overflow: hidden; margin-top: .6rem; }
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--accent), var(--gold));
+  transition: width .4s ease; border-radius: 5px;
+}
+
+.ticket-panel { padding: 1.1rem 1.25rem; margin-bottom: 1.25rem; }
+.ticket-panel h3 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.15rem;
+  letter-spacing: .05em; color: var(--gold); margin-bottom: .55rem;
+}
+
+.ticket-panel textarea {
+  width: 100%; min-height: 72px; background: rgba(0,0,0,.25);
+  border: 1px solid var(--border); color: var(--text);
+  border-radius: 10px; padding: .6rem; font-size: .75rem;
+  font-family: monospace; resize: vertical;
+}
+
+.ticket-panel .row { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .55rem; }
+
+/* ── Groups ── */
+.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.1rem; }
+
+.group-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s;
+}
+
+.group-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+
+.group-head {
+  padding: .75rem 1rem; font-weight: 700;
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(90deg, rgba(123,92,255,.25), transparent);
+  border-bottom: 1px solid var(--border);
+}
+
+.group-head .letter {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+  color: var(--gold); letter-spacing: .05em;
+}
+
+.group-head .round-label { font-size: .75rem; color: var(--muted); font-weight: 500; }
+
+.standings { width: 100%; font-size: .8rem; border-collapse: collapse; }
+.standings th, .standings td { padding: .35rem .65rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,.05); }
+.standings th { color: var(--muted); font-weight: 500; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.standings tr.qualify-1 { background: rgba(255,210,74,.06); }
+.standings tr.qualify-2 { background: rgba(0,240,181,.05); }
+.standings tr.qualify-3 { background: rgba(123,92,255,.06); }
+.standings tr.eliminated { opacity: .45; }
+.standings td:first-child { font-weight: 700; color: var(--muted); width: 1.5rem; }
+
+/* ── Matches ── */
+.round-tabs { display: flex; flex-wrap: wrap; gap: .45rem; margin-bottom: 1.1rem; }
+
+.round-tab {
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text); padding: .5rem 1rem; border-radius: 999px;
+  cursor: pointer; font-size: .85rem; font-weight: 500; transition: .18s;
+}
+
+.round-tab.active {
+  background: linear-gradient(135deg, var(--accent2), #5a3fd4);
+  border-color: transparent; font-weight: 600;
+}
+
+.round-tab.sealed { border-color: var(--accent); }
+.round-tab.sealed::after { content: ' ✓'; color: var(--accent); }
+
+.seal-bar {
+  background: linear-gradient(135deg, var(--card2), var(--card));
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+  display: flex; flex-wrap: wrap; gap: .85rem; align-items: center; justify-content: space-between;
+}
+
+.seal-bar .hint { font-size: .88rem; color: var(--muted); flex: 1; min-width: 200px; }
+
+.matches-list { padding: .5rem .75rem .85rem; }
+
+.match-row {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: .5rem; align-items: center;
+  padding: .55rem .4rem; border-bottom: 1px solid rgba(255,255,255,.05);
+  font-size: .88rem; border-radius: 8px; transition: background .15s;
+  overflow-anchor: auto;
+}
+
+.match-row:hover { background: rgba(255,255,255,.02); }
+.match-row.done { background: var(--done); }
+.match-row.locked-pred { opacity: .75; }
+
+.score-inputs { display: flex; align-items: center; gap: .35rem; }
+
+.score-inputs input {
+  width: 2.6rem; height: 2.4rem; text-align: center;
+  background: rgba(0,0,0,.35); border: 2px solid var(--border);
+  color: var(--text); border-radius: 8px; font-size: 1rem; font-weight: 700;
+  font-family: 'Bebas Neue', sans-serif; letter-spacing: .02em; transition: .15s;
+}
+
+.score-inputs input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--glow);
+}
+
+.score-inputs input:disabled { opacity: .9; border-color: var(--accent); color: var(--accent); }
+.score-inputs .sep { color: var(--muted); font-size: 1rem; font-weight: 700; }
+.match-date { grid-column: 1/-1; font-size: .7rem; color: var(--muted); text-align: center; }
+
+.match-row .pts-badge, .score-compare .pts-badge {
+  font-size: .68rem; padding: .15rem .45rem; border-radius: 6px; margin-left: .3rem; font-weight: 700;
+}
+
+.pts-3 { background: #0d4d30; color: #5dffb0; }
+.pts-2 { background: #3d4a18; color: #d4f070; }
+.pts-1 { background: #4a3d10; color: var(--gold); }
+.pts-0 { background: #4a1818; color: #ff8080; }
+
+.score-compare {
+  display: flex; align-items: center; gap: .35rem; font-size: .88rem;
+  font-variant-numeric: tabular-nums; justify-content: center;
+}
+
+.score-compare .pred { color: var(--muted); text-decoration: line-through; }
+.score-compare .arrow { color: var(--muted); font-size: .75rem; }
+.score-compare .act { font-weight: 700; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+.score-compare .act.miss { color: #ff8080; }
+.score-compare .act.ok { color: var(--gold); }
+.score-compare .act.good { color: var(--accent); }
+
+/* ── Knockout ── */
+.knockout-section { margin-bottom: 1.75rem; }
+
+.knockout-section h2 {
+  font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem;
+  letter-spacing: .06em; color: var(--gold); margin-bottom: .85rem;
+  padding-bottom: .4rem; border-bottom: 2px solid var(--border);
+}
+
+.ko-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: .85rem; }
+
+.ko-match {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .85rem;
+  box-shadow: var(--shadow); transition: transform .18s;
+}
+
+.ko-match:hover { transform: translateY(-2px); }
+.ko-match .mid { font-size: .72rem; color: var(--muted); text-align: center; margin-bottom: .45rem; text-transform: uppercase; letter-spacing: .05em; }
+
+.champion-box {
+  text-align: center; padding: 2rem 1.5rem; margin-top: 1.5rem;
+  background: linear-gradient(135deg, rgba(28,22,64,.95), rgba(15,10,46,.98));
+  border: 2px solid var(--gold); border-radius: 20px;
+  box-shadow: 0 0 60px rgba(255,210,74,.12);
+  position: relative; overflow: hidden;
+}
+
+.champion-box::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255,210,74,.1), transparent 60%);
+}
+
+.champion-box .trophy { font-size: 3rem; filter: drop-shadow(0 4px 12px rgba(255,210,74,.4)); }
+.champion-box .champ-label { font-size: .85rem; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; margin-top: .5rem; }
+
+.champion-box .champ-name {
+  font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--gold);
+  margin-top: .5rem; letter-spacing: .04em;
+  display: flex; align-items: center; justify-content: center; gap: .6rem;
+}
+
+.third-place-info {
+  padding: 1rem 1.25rem; margin-bottom: 1.25rem; font-size: .88rem; line-height: 1.6;
+}
+
+.third-place-info strong { color: var(--accent); }
+
+.summary-block { padding: 1.25rem; margin-bottom: 1.25rem; }
+.summary-block h3 {
+  font-family: 'Bebas Neue', sans-serif; color: var(--gold);
+  margin-bottom: .65rem; font-size: 1.1rem; letter-spacing: .04em;
+}
+
+/* ── Leaderboard ── */
+.leaderboard-table { width: 100%; border-collapse: collapse; font-size: .85rem; margin-top: .85rem; }
+.leaderboard-table th, .leaderboard-table td { border: 1px solid var(--border); padding: .55rem .65rem; text-align: center; }
+.leaderboard-table th {
+  background: var(--card2); color: var(--gold); font-size: .75rem;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.leaderboard-table td.name { text-align: left; font-weight: 600; }
+.leaderboard-table tr.leader td { background: rgba(255,210,74,.08); }
+.leaderboard-table .total-col { color: var(--gold); font-weight: 700; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+
+.import-status { font-size: .85rem; color: var(--accent); margin-top: .4rem; min-height: 1.2em; }
+
+.coupon-upload-label {
+  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  padding: .55rem .9rem; background: rgba(255,255,255,.06);
+  border: 1px solid var(--border); border-radius: 10px; font-size: .88rem; transition: .18s;
+}
+
+.coupon-upload-label:hover { border-color: var(--accent); background: var(--card-hover); }
+.coupon-upload-label input { display: none; }
+
+.sync-bar {
+  display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
+  justify-content: space-between; padding: .85rem 1.25rem; margin-bottom: 1.25rem;
+}
+
+#pdf-meta { display: none; }
+
+#coupon-print-modal {
+  display: none; position: fixed; inset: 0; z-index: 100000;
+  background: rgba(0,0,0,.85); padding: .5rem; overflow: auto;
+}
+#coupon-print-modal.open { display: flex; flex-direction: column; align-items: center; }
+.print-modal-actions {
+  display: flex; gap: .5rem; width: 100%; max-width: 360px;
+  margin-bottom: .5rem; position: sticky; top: 0; z-index: 1;
+}
+.print-modal-actions button {
+  flex: 1; padding: .75rem; font-size: 1rem; font-weight: 700;
+  border: none; border-radius: 10px; cursor: pointer;
+}
+#print-modal-do { background: var(--gold); color: #111; }
+#print-modal-close { flex: 0 0 auto; width: 3rem; background: rgba(255,255,255,.15); color: #fff; }
+#print-modal-frame {
+  width: 100%; max-width: 360px; min-height: 70vh; border: none;
+  background: #fff; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+
+@media print {
+  #coupon-print-modal { display: none !important; }
+  body { background: #fff; color: #111; }
+  body::before { display: none; }
+  header { position: static; background: #fff; border-bottom: 2px solid #000; box-shadow: none; }
+  h1, .sub { color: #111; }
+  button, .tabs, .toolbar button, .progress-bar, .ticket-panel, .seal-bar, .round-tabs { display: none !important; }
+  .panel { display: block !important; page-break-inside: avoid; }
+  .group-card, .ko-match, .summary-block { break-inside: avoid; border-color: #ccc; background: #f9f9f9; }
+  #pdf-meta { display: block !important; text-align: center; padding: 1rem; border: 2px solid #000; margin-bottom: 1rem; border-radius: 8px; }
+  .flag { box-shadow: none; }
+}
+
+@media (max-width: 600px) {
+  .brand h1 { font-size: 1.6rem; }
+  .scoreboard .total { font-size: 2.2rem; }
+  .match-row { font-size: .8rem; }
+  .groups-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="header-inner">
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-icon">🏆</div>
+      <div>
+        <h1>WORLD CUP <span>2026</span></h1>
+        <div class="sub">Прогноз сітки · <strong>48 команд</strong> · 104 матчі · США · Мексика · Канада</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="playerName" placeholder="Твоє ім'я..." maxlength="40">
+      <button class="gold" onclick="exportPDF()" title="Букмекерський купон для друку / збереження PDF">📄 Купон</button>
+      <button onclick="saveData()">💾</button>
+      <button onclick="resetAll()">🔄</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="groups">Групи</button>
+    <button class="tab" data-tab="knockout">Плей-оф</button>
+    <button class="tab" data-tab="summary">Підсумок</button>
+    <button class="tab" data-tab="leaderboard">Лідери</button>
+  </div>
+  </div>
+</header>
+
+<main>
+  <div id="pdf-meta">
+    <h2>FIFA World Cup 2026 — Прогноз</h2>
+    <p id="pdf-player"></p>
+    <p id="pdf-date"></p>
+  </div>
+
+  <div class="scoreboard" id="scoreboard">
+    <div>
+      <div class="score-label">Твій рахунок</div>
+      <div style="display:flex;align-items:baseline;gap:.35rem">
+        <div class="total" id="total-points">0</div>
+        <span style="font-size:1rem;color:var(--muted);font-weight:500">очок</span>
+      </div>
+      <div class="pts-legend">3 = точний · 2 = різниця · 1 = результат · 0 = промах</div>
+    </div>
+    <div class="breakdown" id="points-breakdown">Закрий тур і згенеруй квиток, щоб зафіксувати прогноз</div>
+  </div>
+
+  <div class="ticket-panel sync-bar">
+    <span id="sync-status" style="font-size:.85rem;color:var(--muted)">Результати: завантаження...</span>
+    <button class="primary" onclick="fetchResults(true)">🔄 Оновити результати</button>
+  </div>
+
+  <div class="ticket-panel">
+    <h3>🎫 Купон — продовжити гру</h3>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Перед новим туром <strong>завантаж PDF</strong> або натисни <strong>«З коду внизу ↑»</strong> (найнадійніше). PDF-парсер потребує інтернет.</p>
+    <div id="import-status" class="import-status"></div>
+    <div class="row" style="margin-bottom:.5rem">
+      <label class="coupon-upload-label">
+        📎 Завантажити PDF-купон
+        <input type="file" id="couponPdfInput" accept=".pdf,application/pdf" onchange="importCouponPdf(this)">
+      </label>
+      <button class="primary" onclick="importTicket()">Завантажити купон</button>
+      <button onclick="importFromOutput()">З коду внизу ↑</button>
+    </div>
+    <textarea id="ticketInput" placeholder="Код з PDF (внизу купона) — FIFA26C|..."></textarea>
+    <div id="coupon-buttons" class="row" style="margin:.5rem 0"></div>
+    <textarea id="ticketOutput" readonly placeholder="Код накопичувального купона з'явиться після закриття туру..." style="min-height:48px;font-size:.72rem"></textarea>
+    <div class="row" style="margin-top:.5rem">
+      <button onclick="copyTicket()">Копіювати код купона</button>
+      <button onclick="printCumulativeCoupon()">📄 Друк накопичувального купона</button>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div id="progress-text">Заповнено: 0 / 104 матчів</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="panel-groups" class="panel active">
+    <div class="round-tabs" id="group-round-tabs"></div>
+    <div class="seal-bar" id="group-seal-bar"></div>
+    <div class="groups-grid" id="groups-container"></div>
+  </div>
+
+  <div id="panel-knockout" class="panel">
+    <div class="round-tabs" id="ko-round-tabs"></div>
+    <div class="seal-bar" id="ko-seal-bar"></div>
+    <div class="third-place-info" id="third-info">Заповніть прогнози групового етапу, щоб сформувати сітку 1/16 фіналу.</div>
+    <div id="knockout-container"></div>
+    <div class="champion-box" id="champion-box">
+      <div class="trophy">🏆</div>
+      <div class="champ-label">Чемпіон світу 2026</div>
+      <div class="champ-name" id="champion-name">—</div>
+    </div>
+  </div>
+
+  <div id="panel-summary" class="panel">
+    <div class="summary-block" id="summary-content"></div>
+  </div>
+
+  <div id="panel-leaderboard" class="panel">
+    <div class="ticket-panel" style="margin-bottom:1rem">
+      <h3>🏆 Таблиця лідерів</h3>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Завантаж <strong>PDF</strong> або встав текст з купона цілком (навіть якщо код переноситься на кілька рядків — це нормально). Кілька купонів — через PDF або один за одним.</p>
+      <label class="coupon-upload-label" style="margin-bottom:.5rem">
+        📎 PDF купони друзів
+        <input type="file" id="leaderboardPdfInput" accept=".pdf,application/pdf" multiple onchange="importLeaderboardPdfs(this)">
+      </label>
+      <textarea id="leaderboardInput" placeholder="Встав сюди текст з PDF або купона (може бути на кількох рядках)..." style="min-height:100px;margin-top:.5rem"></textarea>
+      <div class="row" style="margin-top:.5rem">
+        <button class="primary" onclick="refreshLeaderboard()">Оновити таблицю</button>
+        <button onclick="clearLeaderboard()">Очистити</button>
+      </div>
+      <div id="leaderboard-status" style="font-size:.82rem;color:var(--accent);margin-top:.4rem"></div>
+    </div>
+    <div id="leaderboard-table-wrap"></div>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+const TEAMS = {
+  MEX:{n:'Мексика',iso:'mx',r:14},RSA:{n:'ПАР',iso:'za',r:59},KOR:{n:'Півд. Корея',iso:'kr',r:23},CZE:{n:'Чехія',iso:'cz',r:31},
+  CAN:{n:'Канада',iso:'ca',r:27},BIH:{n:'Боснія',iso:'ba',r:61},QAT:{n:'Катар',iso:'qa',r:35},SUI:{n:'Швейцарія',iso:'ch',r:19},
+  BRA:{n:'Бразилія',iso:'br',r:5},MAR:{n:'Марокко',iso:'ma',r:13},HAI:{n:'Гаїті',iso:'ht',r:87},SCO:{n:'Шотландія',iso:'gb-sct',r:36},
+  USA:{n:'США',iso:'us',r:16},PAR:{n:'Парагвай',iso:'py',r:52},AUS:{n:'Австралія',iso:'au',r:24},TUR:{n:'Туреччина',iso:'tr',r:38},
+  GER:{n:'Німеччина',iso:'de',r:8},CUW:{n:'Кюрасао',iso:'cw',r:90},CIV:{n:'Кот-д\'Івуар',iso:'ci',r:36},ECU:{n:'Еквадор',iso:'ec',r:30},
+  NED:{n:'Нідерланди',iso:'nl',r:7},JPN:{n:'Японія',iso:'jp',r:18},SWE:{n:'Швеція',iso:'se',r:32},TUN:{n:'Туніс',iso:'tn',r:41},
+  BEL:{n:'Бельгія',iso:'be',r:15},EGY:{n:'Єгипет',iso:'eg',r:34},IRN:{n:'Іран',iso:'ir',r:20},NZL:{n:'Н. Зеландія',iso:'nz',r:93},
+  ESP:{n:'Іспанія',iso:'es',r:1},CPV:{n:'Кабо-Верде',iso:'cv',r:65},KSA:{n:'С. Аравія',iso:'sa',r:60},URU:{n:'Уругвай',iso:'uy',r:9},
+  FRA:{n:'Франція',iso:'fr',r:2},SEN:{n:'Сенегал',iso:'sn',r:17},IRQ:{n:'Ірак',iso:'iq',r:58},NOR:{n:'Норвегія',iso:'no',r:43},
+  ARG:{n:'Аргентина',iso:'ar',r:3},ALG:{n:'Алжир',iso:'dz',r:32},AUT:{n:'Австрія',iso:'at',r:22},JOR:{n:'Йорданія',iso:'jo',r:71},
+  POR:{n:'Португалія',iso:'pt',r:6},COD:{n:'Конго ДР',iso:'cd',r:67},UZB:{n:'Узбекистан',iso:'uz',r:64},COL:{n:'Колумбія',iso:'co',r:12},
+  ENG:{n:'Англія',iso:'gb-eng',r:4},CRO:{n:'Хорватія',iso:'hr',r:10},GHA:{n:'Гана',iso:'gh',r:68},PAN:{n:'Панама',iso:'pa',r:45}
+};
+
+const GROUP_COLORS = {
+  A:'#ff2d95',B:'#7b5cff',C:'#00f0b5',D:'#ffd24a',E:'#ff6b35',F:'#4ecdc4',
+  G:'#a78bfa',H:'#f472b6',I:'#34d399',J:'#60a5fa',K:'#fbbf24',L:'#fb7185'
+};
+
+const GROUPS = {
+  A:['MEX','RSA','KOR','CZE'],B:['CAN','BIH','QAT','SUI'],C:['BRA','MAR','HAI','SCO'],
+  D:['USA','PAR','AUS','TUR'],E:['GER','CUW','CIV','ECU'],F:['NED','JPN','SWE','TUN'],
+  G:['BEL','EGY','IRN','NZL'],H:['ESP','CPV','KSA','URU'],I:['FRA','SEN','IRQ','NOR'],
+  J:['ARG','ALG','AUT','JOR'],K:['POR','COD','UZB','COL'],L:['ENG','CRO','GHA','PAN']
+};
+
+const MATCHES = [
+  {id:1,g:'A',h:'MEX',a:'RSA',d:'11 червня',done:true,hs:2,as:0},
+  {id:2,g:'A',h:'KOR',a:'CZE',d:'12 червня',done:true,hs:2,as:1},
+  {id:3,g:'B',h:'CAN',a:'BIH',d:'12 червня',done:true,hs:1,as:1},
+  {id:4,g:'D',h:'USA',a:'PAR',d:'13 червня',done:true,hs:4,as:1},
+  {id:5,g:'B',h:'QAT',a:'SUI',d:'13 червня',done:true,hs:1,as:1},
+  {id:6,g:'C',h:'BRA',a:'MAR',d:'13 червня',done:true,hs:1,as:1},
+  {id:7,g:'C',h:'HAI',a:'SCO',d:'14 червня',done:true,hs:0,as:1},
+  {id:8,g:'D',h:'AUS',a:'TUR',d:'14 червня',done:true,hs:2,as:0},
+  {id:9,g:'E',h:'GER',a:'CUW',d:'14 червня',done:true,hs:7,as:1},
+  {id:10,g:'F',h:'NED',a:'JPN',d:'14 червня',done:true,hs:2,as:2},
+  {id:11,g:'E',h:'CIV',a:'ECU',d:'14 червня',done:true,hs:1,as:0},
+  {id:12,g:'F',h:'SWE',a:'TUN',d:'15 червня',done:true,hs:5,as:1},
+  {id:13,g:'H',h:'ESP',a:'CPV',d:'15 червня',done:true,hs:0,as:0},
+  {id:14,g:'G',h:'BEL',a:'EGY',d:'15 червня',done:true,hs:1,as:1},
+  {id:15,g:'H',h:'KSA',a:'URU',d:'15 червня',done:true,hs:1,as:1},
+  {id:16,g:'G',h:'IRN',a:'NZL',d:'16 червня',done:true,hs:2,as:2},
+  {id:17,g:'I',h:'FRA',a:'SEN',d:'16 червня',done:true,hs:3,as:1},
+  {id:18,g:'I',h:'IRQ',a:'NOR',d:'16 червня',done:true,hs:1,as:4},
+  {id:19,g:'J',h:'ARG',a:'ALG',d:'17 червня',done:true,hs:3,as:0},
+  {id:20,g:'J',h:'AUT',a:'JOR',d:'17 червня',done:true,hs:3,as:1},
+  {id:21,g:'K',h:'POR',a:'COD',d:'17 червня'},
+  {id:22,g:'L',h:'ENG',a:'CRO',d:'17 червня'},
+  {id:23,g:'L',h:'GHA',a:'PAN',d:'17 червня'},
+  {id:24,g:'K',h:'UZB',a:'COL',d:'18 червня'},
+  {id:25,g:'A',h:'CZE',a:'RSA',d:'18 червня'},
+  {id:26,g:'B',h:'SUI',a:'BIH',d:'18 червня'},
+  {id:27,g:'B',h:'CAN',a:'QAT',d:'18 червня'},
+  {id:28,g:'A',h:'MEX',a:'KOR',d:'19 червня'},
+  {id:29,g:'D',h:'USA',a:'AUS',d:'19 червня'},
+  {id:30,g:'C',h:'SCO',a:'MAR',d:'19 червня'},
+  {id:31,g:'C',h:'BRA',a:'HAI',d:'20 червня'},
+  {id:32,g:'D',h:'TUR',a:'PAR',d:'20 червня'},
+  {id:33,g:'F',h:'NED',a:'SWE',d:'20 червня'},
+  {id:34,g:'E',h:'GER',a:'CIV',d:'20 червня'},
+  {id:35,g:'E',h:'ECU',a:'CUW',d:'21 червня'},
+  {id:36,g:'F',h:'TUN',a:'JPN',d:'21 червня'},
+  {id:37,g:'H',h:'ESP',a:'KSA',d:'21 червня'},
+  {id:38,g:'G',h:'BEL',a:'IRN',d:'21 червня'},
+  {id:39,g:'H',h:'URU',a:'CPV',d:'21 червня'},
+  {id:40,g:'G',h:'NZL',a:'EGY',d:'22 червня'},
+  {id:41,g:'J',h:'ARG',a:'AUT',d:'22 червня'},
+  {id:42,g:'I',h:'FRA',a:'IRQ',d:'22 червня'},
+  {id:43,g:'I',h:'NOR',a:'SEN',d:'23 червня'},
+  {id:44,g:'J',h:'JOR',a:'ALG',d:'23 червня'},
+  {id:45,g:'K',h:'POR',a:'UZB',d:'23 червня'},
+  {id:46,g:'L',h:'ENG',a:'GHA',d:'23 червня'},
+  {id:47,g:'L',h:'PAN',a:'CRO',d:'23 червня'},
+  {id:48,g:'K',h:'COL',a:'COD',d:'24 червня'},
+  {id:49,g:'B',h:'SUI',a:'CAN',d:'24 червня'},
+  {id:50,g:'B',h:'BIH',a:'QAT',d:'24 червня'},
+  {id:51,g:'C',h:'SCO',a:'BRA',d:'24 червня'},
+  {id:52,g:'C',h:'MAR',a:'HAI',d:'24 червня'},
+  {id:53,g:'A',h:'CZE',a:'MEX',d:'25 червня'},
+  {id:54,g:'A',h:'RSA',a:'KOR',d:'25 червня'},
+  {id:55,g:'E',h:'CUW',a:'CIV',d:'25 червня'},
+  {id:56,g:'E',h:'ECU',a:'GER',d:'25 червня'},
+  {id:57,g:'F',h:'JPN',a:'SWE',d:'25 червня'},
+  {id:58,g:'F',h:'TUN',a:'NED',d:'25 червня'},
+  {id:59,g:'D',h:'TUR',a:'USA',d:'26 червня'},
+  {id:60,g:'D',h:'PAR',a:'AUS',d:'26 червня'},
+  {id:61,g:'I',h:'NOR',a:'FRA',d:'26 червня'},
+  {id:62,g:'I',h:'SEN',a:'IRQ',d:'26 червня'},
+  {id:63,g:'H',h:'CPV',a:'KSA',d:'27 червня'},
+  {id:64,g:'H',h:'URU',a:'ESP',d:'27 червня'},
+  {id:65,g:'G',h:'EGY',a:'IRN',d:'27 червня'},
+  {id:66,g:'G',h:'NZL',a:'BEL',d:'27 червня'},
+  {id:67,g:'L',h:'PAN',a:'ENG',d:'27 червня'},
+  {id:68,g:'L',h:'CRO',a:'GHA',d:'27 червня'},
+  {id:69,g:'K',h:'COL',a:'POR',d:'27 червня'},
+  {id:70,g:'K',h:'COD',a:'UZB',d:'27 червня'},
+  {id:71,g:'J',h:'ALG',a:'AUT',d:'27 червня'},
+  {id:72,g:'J',h:'JOR',a:'ARG',d:'27 червня'}
+];
+
+const R32 = [
+  {id:73,l:'1/16 · M73',h:{t:'pos',g:'A',p:2},a:{t:'pos',g:'B',p:2}},
+  {id:74,l:'1/16 · M74',h:{t:'pos',g:'E',p:1},a:{t:'3rd',s:'1E'}},
+  {id:75,l:'1/16 · M75',h:{t:'pos',g:'F',p:1},a:{t:'pos',g:'C',p:2}},
+  {id:76,l:'1/16 · M76',h:{t:'pos',g:'C',p:1},a:{t:'pos',g:'F',p:2}},
+  {id:77,l:'1/16 · M77',h:{t:'pos',g:'I',p:1},a:{t:'3rd',s:'1I'}},
+  {id:78,l:'1/16 · M78',h:{t:'pos',g:'E',p:2},a:{t:'pos',g:'I',p:2}},
+  {id:79,l:'1/16 · M79',h:{t:'pos',g:'A',p:1},a:{t:'3rd',s:'1A'}},
+  {id:80,l:'1/16 · M80',h:{t:'pos',g:'L',p:1},a:{t:'3rd',s:'1L'}},
+  {id:81,l:'1/16 · M81',h:{t:'pos',g:'D',p:1},a:{t:'3rd',s:'1D'}},
+  {id:82,l:'1/16 · M82',h:{t:'pos',g:'G',p:1},a:{t:'3rd',s:'1G'}},
+  {id:83,l:'1/16 · M83',h:{t:'pos',g:'K',p:2},a:{t:'pos',g:'L',p:2}},
+  {id:84,l:'1/16 · M84',h:{t:'pos',g:'H',p:1},a:{t:'pos',g:'J',p:2}},
+  {id:85,l:'1/16 · M85',h:{t:'pos',g:'B',p:1},a:{t:'3rd',s:'1B'}},
+  {id:86,l:'1/16 · M86',h:{t:'pos',g:'J',p:1},a:{t:'pos',g:'H',p:2}},
+  {id:87,l:'1/16 · M87',h:{t:'pos',g:'K',p:1},a:{t:'3rd',s:'1K'}},
+  {id:88,l:'1/16 · M88',h:{t:'pos',g:'D',p:2},a:{t:'pos',g:'G',p:2}}
+];
+
+const KO_TREE = [
+  {round:'1/8 фіналу',matches:[
+    {id:89,l:'M89',h:'W73',a:'W75'},{id:90,l:'M90',h:'W74',a:'W77'},
+    {id:91,l:'M91',h:'W76',a:'W78'},{id:92,l:'M92',h:'W79',a:'W80'},
+    {id:93,l:'M93',h:'W81',a:'W82'},{id:94,l:'M94',h:'W83',a:'W84'},
+    {id:95,l:'M95',h:'W85',a:'W86'},{id:96,l:'M96',h:'W87',a:'W88'}
+  ]},
+  {round:'1/4 фіналу',matches:[
+    {id:97,l:'M97',h:'W89',a:'W90'},{id:98,l:'M98',h:'W93',a:'W94'},
+    {id:99,l:'M99',h:'W91',a:'W92'},{id:100,l:'M100',h:'W95',a:'W96'}
+  ]},
+  {round:'Півфінали',matches:[
+    {id:101,l:'M101',h:'W97',a:'W98'},{id:102,l:'M102',h:'W99',a:'W100'}
+  ]},
+  {round:'Матч за 3-є місце',matches:[
+    {id:103,l:'M103',h:'L101',a:'L102'}
+  ]},
+  {round:'Фінал',matches:[
+    {id:104,l:'M104',h:'W101',a:'W102'}
+  ]}
+];
+
+const THIRD_SLOTS = ['1A','1B','1D','1E','1G','1I','1K','1L'];
+const ANNEX_RAW = `EFGHIJKL:EJIFHGLK
+DFGHIJKL:HGIDJFLK
+DEGHIJKL:EJIDHGLK
+DEFHIJKL:EJIDHFLK
+DEFGIJKL:EGIDJFLK
+DEFGHJKL:EGJDHFLK
+DEFGHIKL:EGIDHFLK
+DEFGHIJL:EGJDHFLI
+DEFGHIJK:EGJDHFIK
+CFGHIJKL:HGICJFLK
+CEGHIJKL:EJICHGLK
+CEFHIJKL:EJICHFLK
+CEFGIJKL:EGICJFLK
+CEFGHJKL:EGJCHFLK
+CEFGHIKL:EGICHFLK
+CEFGHIJL:EGJCHFLI
+CEFGHIJK:EGJCHFIK
+CDGHIJKL:HGICJDLK
+CDFHIJKL:CJIDHFLK
+CDFGIJKL:CGIDJFLK
+CDFGHJKL:CGJDHFLK
+CDFGHIKL:CGIDHFLK
+CDFGHIJL:CGJDHFLI
+CDFGHIJK:CGJDHFIK
+CDEHIJKL:EJICHDLK
+CDEGIJKL:EGICJDLK
+CDEGHJKL:EGJCHDLK
+CDEGHIKL:EGICHDLK
+CDEGHIJL:EGJCHDLI
+CDEGHIJK:EGJCHDIK
+CDEFIJKL:CJEDIFLK
+CDEFHJKL:CJEDHFLK
+CDEFHIKL:CEIDHFLK
+CDEFHIJL:CJEDHFLI
+CDEFHIJK:CJEDHFIK
+CDEFGJKL:CGEDJFLK
+CDEFGIKL:CGEDIFLK
+CDEFGIJL:CGEDJFLI
+CDEFGIJK:CGEDJFIK
+CDEFGHKL:CGEDHFLK
+CDEFGHJL:CGJDHFLE
+CDEFGHJK:CGJDHFEK
+CDEFGHIL:CGEDHFLI
+CDEFGHIK:CGEDHFIK
+CDEFGHIJ:CGJDHFEI
+BFGHIJKL:HJBFIGLK
+BEGHIJKL:EJIBHGLK
+BEFHIJKL:EJBFIHLK
+BEFGIJKL:EJBFIGLK
+BEFGHJKL:EJBFHGLK
+BEFGHIKL:EGBFIHLK
+BEFGHIJL:EJBFHGLI
+BEFGHIJK:EJBFHGIK
+BDGHIJKL:HJBDIGLK
+BDFHIJKL:HJBDIFLK
+BDFGIJKL:IGBDJFLK
+BDFGHJKL:HGBDJFLK
+BDFGHIKL:HGBDIFLK
+BDFGHIJL:HGBDJFLI
+BDFGHIJK:HGBDJFIK
+BDEHIJKL:EJBDIHLK
+BDEGIJKL:EJBDIGLK
+BDEGHJKL:EJBDHGLK
+BDEGHIKL:EGBDIHLK
+BDEGHIJL:EJBDHGLI
+BDEGHIJK:EJBDHGIK
+BDEFIJKL:EJBDIFLK
+BDEFHJKL:EJBDHFLK
+BDEFHIKL:EIBDHFLK
+BDEFHIJL:EJBDHFLI
+BDEFHIJK:EJBDHFIK
+BDEFGJKL:EGBDJFLK
+BDEFGIKL:EGBDIFLK
+BDEFGIJL:EGBDJFLI
+BDEFGIJK:EGBDJFIK
+BDEFGHKL:EGBDHFLK
+BDEFGHJL:HGBDJFLE
+BDEFGHJK:HGBDJFEK
+BDEFGHIL:EGBDHFLI
+BDEFGHIK:EGBDHFIK
+BDEFGHIJ:HGBDJFEI
+BCGHIJKL:HJBCIGLK
+BCFHIJKL:HJBCIFLK
+BCFGIJKL:IGBCJFLK
+BCFGHJKL:HGBCJFLK
+BCFGHIKL:HGBCIFLK
+BCFGHIJL:HGBCJFLI
+BCFGHIJK:HGBCJFIK
+BCEHIJKL:EJBCIHLK
+BCEGIJKL:EJBCIGLK
+BCEGHJKL:EJBCHGLK
+BCEGHIKL:EGBCIHLK
+BCEGHIJL:EJBCHGLI
+BCEGHIJK:EJBCHGIK
+BCEFIJKL:EJBCIFLK
+BCEFHJKL:EJBCHFLK
+BCEFHIKL:EIBCHFLK
+BCEFHIJL:EJBCHFLI
+BCEFHIJK:EJBCHFIK
+BCEFGJKL:EGBCJFLK
+BCEFGIKL:EGBCIFLK
+BCEFGIJL:EGBCJFLI
+BCEFGIJK:EGBCJFIK
+BCEFGHKL:EGBCHFLK
+BCEFGHJL:HGBCJFLE
+BCEFGHJK:HGBCJFEK
+BCEFGHIL:EGBCHFLI
+BCEFGHIK:EGBCHFIK
+BCEFGHIJ:HGBCJFEI
+BCDHIJKL:HJBCIDLK
+BCDGIJKL:IGBCJDLK
+BCDGHJKL:HGBCJDLK
+BCDGHIKL:HGBCIDLK
+BCDGHIJL:HGBCJDLI
+BCDGHIJK:HGBCJDIK
+BCDFIJKL:CJBDIFLK
+BCDFHJKL:CJBDHFLK
+BCDFHIKL:CIBDHFLK
+BCDFHIJL:CJBDHFLI
+BCDFHIJK:CJBDHFIK
+BCDFGJKL:CGBDJFLK
+BCDFGIKL:CGBDIFLK
+BCDFGIJL:CGBDJFLI
+BCDFGIJK:CGBDJFIK
+BCDFGHKL:CGBDHFLK
+BCDFGHJL:CGBDHFLJ
+BCDFGHJK:HGBCJFDK
+BCDFGHIL:CGBDHFLI
+BCDFGHIK:CGBDHFIK
+BCDFGHIJ:HGBCJFDI
+BCDEIJKL:EJBCIDLK
+BCDEHJKL:EJBCHDLK
+BCDEHIKL:EIBCHDLK
+BCDEHIJL:EJBCHDLI
+BCDEHIJK:EJBCHDIK
+BCDEGJKL:EGBCJDLK
+BCDEGIKL:EGBCIDLK
+BCDEGIJL:EGBCJDLI
+BCDEGIJK:EGBCJDIK
+BCDEGHKL:EGBCHDLK
+BCDEGHJL:HGBCJDLE
+BCDEGHJK:HGBCJDEK
+BCDEGHIL:EGBCHDLI
+BCDEGHIK:EGBCHDIK
+BCDEGHIJ:HGBCJDEI
+BCDEFJKL:CJBDEFLK
+BCDEFIKL:CEBDIFLK
+BCDEFIJL:CJBDEFLI
+BCDEFIJK:CJBDEFIK
+BCDEFHKL:CEBDHFLK
+BCDEFHJL:CJBDHFLE
+BCDEFHJK:CJBDHFEK
+BCDEFHIL:CEBDHFLI
+BCDEFHIK:CEBDHFIK
+BCDEFHIJ:CJBDHFEI
+BCDEFGKL:CGBDEFLK
+BCDEFGJL:CGBDJFLE
+BCDEFGJK:CGBDJFEK
+BCDEFGIL:CGBDEFLI
+BCDEFGIK:CGBDEFIK
+BCDEFGIJ:CGBDJFEI
+BCDEFGHL:CGBDHFLE
+BCDEFGHK:CGBDHFEK
+BCDEFGHJ:HGBCJFDE
+BCDEFGHI:CGBDHFEI
+AFGHIJKL:HJIFAGLK
+AEGHIJKL:EJIAHGLK
+AEFHIJKL:EJIFAHLK
+AEFGIJKL:EJIFAGLK
+AEFGHJKL:EGJFAHLK
+AEFGHIKL:EGIFAHLK
+AEFGHIJL:EGJFAHLI
+AEFGHIJK:EGJFAHIK
+ADGHIJKL:HJIDAGLK
+ADFHIJKL:HJIDAFLK
+ADFGIJKL:IGJDAFLK
+ADFGHJKL:HGJDAFLK
+ADFGHIKL:HGIDAFLK
+ADFGHIJL:HGJDAFLI
+ADFGHIJK:HGJDAFIK
+ADEHIJKL:EJIDAHLK
+ADEGIJKL:EJIDAGLK
+ADEGHJKL:EGJDAHLK
+ADEGHIKL:EGIDAHLK
+ADEGHIJL:EGJDAHLI
+ADEGHIJK:EGJDAHIK
+ADEFIJKL:EJIDAFLK
+ADEFHJKL:HJEDAFLK
+ADEFHIKL:HEIDAFLK
+ADEFHIJL:HJEDAFLI
+ADEFHIJK:HJEDAFIK
+ADEFGJKL:EGJDAFLK
+ADEFGIKL:EGIDAFLK
+ADEFGIJL:EGJDAFLI
+ADEFGIJK:EGJDAFIK
+ADEFGHKL:HGEDAFLK
+ADEFGHJL:HGJDAFLE
+ADEFGHJK:HGJDAFEK
+ADEFGHIL:HGEDAFLI
+ADEFGHIK:HGEDAFIK
+ADEFGHIJ:HGJDAFEI
+ACGHIJKL:HJICAGLK
+ACFHIJKL:HJICAFLK
+ACFGIJKL:IGJCAFLK
+ACFGHJKL:HGJCAFLK
+ACFGHIKL:HGICAFLK
+ACFGHIJL:HGJCAFLI
+ACFGHIJK:HGJCAFIK
+ACEHIJKL:EJICAHLK
+ACEGIJKL:EJICAGLK
+ACEGHJKL:EGJCAHLK
+ACEGHIKL:EGICAHLK
+ACEGHIJL:EGJCAHLI
+ACEGHIJK:EGJCAHIK
+ACEFIJKL:EJICAFLK
+ACEFHJKL:HJECAFLK
+ACEFHIKL:HEICAFLK
+ACEFHIJL:HJECAFLI
+ACEFHIJK:HJECAFIK
+ACEFGJKL:EGJCAFLK
+ACEFGIKL:EGICAFLK
+ACEFGIJL:EGJCAFLI
+ACEFGIJK:EGJCAFIK
+ACEFGHKL:HGECAFLK
+ACEFGHJL:HGJCAFLE
+ACEFGHJK:HGJCAFEK
+ACEFGHIL:HGECAFLI
+ACEFGHIK:HGECAFIK
+ACEFGHIJ:HGJCAFEI
+ACDHIJKL:HJICADLK
+ACDGIJKL:IGJCADLK
+ACDGHJKL:HGJCADLK
+ACDGHIKL:HGICADLK
+ACDGHIJL:HGJCADLI
+ACDGHIJK:HGJCADIK
+ACDFIJKL:CJIDAFLK
+ACDFHJKL:HJFCADLK
+ACDFHIKL:HFICADLK
+ACDFHIJL:HJFCADLI
+ACDFHIJK:HJFCADIK
+ACDFGJKL:CGJDAFLK
+ACDFGIKL:CGIDAFLK
+ACDFGIJL:CGJDAFLI
+ACDFGIJK:CGJDAFIK
+ACDFGHKL:HGFCADLK
+ACDFGHJL:CGJDAFLH
+ACDFGHJK:HGJCAFDK
+ACDFGHIL:HGFCADLI
+ACDFGHIK:HGFCADIK
+ACDFGHIJ:HGJCAFDI
+ACDEIJKL:EJICADLK
+ACDEHJKL:HJECADLK
+ACDEHIKL:HEICADLK
+ACDEHIJL:HJECADLI
+ACDEHIJK:HJECADIK
+ACDEGJKL:EGJCADLK
+ACDEGIKL:EGICADLK
+ACDEGIJL:EGJCADLI
+ACDEGIJK:EGJCADIK
+ACDEGHKL:HGECADLK
+ACDEGHJL:HGJCADLE
+ACDEGHJK:HGJCADEK
+ACDEGHIL:HGECADLI
+ACDEGHIK:HGECADIK
+ACDEGHIJ:HGJCADEI
+ACDEFJKL:CJEDAFLK
+ACDEFIKL:CEIDAFLK
+ACDEFIJL:CJEDAFLI
+ACDEFIJK:CJEDAFIK
+ACDEFHKL:HEFCADLK
+ACDEFHJL:HJFCADLE
+ACDEFHJK:HJECAFDK
+ACDEFHIL:HEFCADLI
+ACDEFHIK:HEFCADIK
+ACDEFHIJ:HJECAFDI
+ACDEFGKL:CGEDAFLK
+ACDEFGJL:CGJDAFLE
+ACDEFGJK:CGJDAFEK
+ACDEFGIL:CGEDAFLI
+ACDEFGIK:CGEDAFIK
+ACDEFGIJ:CGJDAFEI
+ACDEFGHL:HGFCADLE
+ACDEFGHK:HGECAFDK
+ACDEFGHJ:HGJCAFDE
+ACDEFGHI:HGECAFDI
+ABGHIJKL:HJBAIGLK
+ABFHIJKL:HJBAIFLK
+ABFGIJKL:IJBFAGLK
+ABFGHJKL:HJBFAGLK
+ABFGHIKL:HGBAIFLK
+ABFGHIJL:HJBFAGLI
+ABFGHIJK:HJBFAGIK
+ABEHIJKL:EJBAIHLK
+ABEGIJKL:EJBAIGLK
+ABEGHJKL:EJBAHGLK
+ABEGHIKL:EGBAIHLK
+ABEGHIJL:EJBAHGLI
+ABEGHIJK:EJBAHGIK
+ABEFIJKL:EJBAIFLK
+ABEFHJKL:EJBFAHLK
+ABEFHIKL:EIBFAHLK
+ABEFHIJL:EJBFAHLI
+ABEFHIJK:EJBFAHIK
+ABEFGJKL:EJBFAGLK
+ABEFGIKL:EGBAIFLK
+ABEFGIJL:EJBFAGLI
+ABEFGIJK:EJBFAGIK
+ABEFGHKL:EGBFAHLK
+ABEFGHJL:HJBFAGLE
+ABEFGHJK:HJBFAGEK
+ABEFGHIL:EGBFAHLI
+ABEFGHIK:EGBFAHIK
+ABEFGHIJ:HJBFAGEI
+ABDHIJKL:IJBDAHLK
+ABDGIJKL:IJBDAGLK
+ABDGHJKL:HJBDAGLK
+ABDGHIKL:IGBDAHLK
+ABDGHIJL:HJBDAGLI
+ABDGHIJK:HJBDAGIK
+ABDFIJKL:IJBDAFLK
+ABDFHJKL:HJBDAFLK
+ABDFHIKL:HIBDAFLK
+ABDFHIJL:HJBDAFLI
+ABDFHIJK:HJBDAFIK
+ABDFGJKL:FJBDAGLK
+ABDFGIKL:IGBDAFLK
+ABDFGIJL:FJBDAGLI
+ABDFGIJK:FJBDAGIK
+ABDFGHKL:HGBDAFLK
+ABDFGHJL:HGBDAFLJ
+ABDFGHJK:HGBDAFJK
+ABDFGHIL:HGBDAFLI
+ABDFGHIK:HGBDAFIK
+ABDFGHIJ:HGBDAFIJ
+ABDEIJKL:EJBAIDLK
+ABDEHJKL:EJBDAHLK
+ABDEHIKL:EIBDAHLK
+ABDEHIJL:EJBDAHLI
+ABDEHIJK:EJBDAHIK
+ABDEGJKL:EJBDAGLK
+ABDEGIKL:EGBAIDLK
+ABDEGIJL:EJBDAGLI
+ABDEGIJK:EJBDAGIK
+ABDEGHKL:EGBDAHLK
+ABDEGHJL:HJBDAGLE
+ABDEGHJK:HJBDAGEK
+ABDEGHIL:EGBDAHLI
+ABDEGHIK:EGBDAHIK
+ABDEGHIJ:HJBDAGEI
+ABDEFJKL:EJBDAFLK
+ABDEFIKL:EIBDAFLK
+ABDEFIJL:EJBDAFLI
+ABDEFIJK:EJBDAFIK
+ABDEFHKL:HEBDAFLK
+ABDEFHJL:HJBDAFLE
+ABDEFHJK:HJBDAFEK
+ABDEFHIL:HEBDAFLI
+ABDEFHIK:HEBDAFIK
+ABDEFHIJ:HJBDAFEI
+ABDEFGKL:EGBDAFLK
+ABDEFGJL:EGBDAFLJ
+ABDEFGJK:EGBDAFJK
+ABDEFGIL:EGBDAFLI
+ABDEFGIK:EGBDAFIK
+ABDEFGIJ:EGBDAFIJ
+ABDEFGHL:HGBDAFLE
+ABDEFGHK:HGBDAFEK
+ABDEFGHJ:HGBDAFEJ
+ABDEFGHI:HGBDAFEI
+ABCHIJKL:IJBCAHLK
+ABCGIJKL:IJBCAGLK
+ABCGHJKL:HJBCAGLK
+ABCGHIKL:IGBCAHLK
+ABCGHIJL:HJBCAGLI
+ABCGHIJK:HJBCAGIK
+ABCFIJKL:IJBCAFLK
+ABCFHJKL:HJBCAFLK
+ABCFHIKL:HIBCAFLK
+ABCFHIJL:HJBCAFLI
+ABCFHIJK:HJBCAFIK
+ABCFGJKL:CJBFAGLK
+ABCFGIKL:IGBCAFLK
+ABCFGIJL:CJBFAGLI
+ABCFGIJK:CJBFAGIK
+ABCFGHKL:HGBCAFLK
+ABCFGHJL:HGBCAFLJ
+ABCFGHJK:HGBCAFJK
+ABCFGHIL:HGBCAFLI
+ABCFGHIK:HGBCAFIK
+ABCFGHIJ:HGBCAFIJ
+ABCEIJKL:EJBAICLK
+ABCEHJKL:EJBCAHLK
+ABCEHIKL:EIBCAHLK
+ABCEHIJL:EJBCAHLI
+ABCEHIJK:EJBCAHIK
+ABCEGJKL:EJBCAGLK
+ABCEGIKL:EGBAICLK
+ABCEGIJL:EJBCAGLI
+ABCEGIJK:EJBCAGIK
+ABCEGHKL:EGBCAHLK
+ABCEGHJL:HJBCAGLE
+ABCEGHJK:HJBCAGEK
+ABCEGHIL:EGBCAHLI
+ABCEGHIK:EGBCAHIK
+ABCEGHIJ:HJBCAGEI
+ABCEFJKL:EJBCAFLK
+ABCEFIKL:EIBCAFLK
+ABCEFIJL:EJBCAFLI
+ABCEFIJK:EJBCAFIK
+ABCEFHKL:HEBCAFLK
+ABCEFHJL:HJBCAFLE
+ABCEFHJK:HJBCAFEK
+ABCEFHIL:HEBCAFLI
+ABCEFHIK:HEBCAFIK
+ABCEFHIJ:HJBCAFEI
+ABCEFGKL:EGBCAFLK
+ABCEFGJL:EGBCAFLJ
+ABCEFGJK:EGBCAFJK
+ABCEFGIL:EGBCAFLI
+ABCEFGIK:EGBCAFIK
+ABCEFGIJ:EGBCAFIJ
+ABCEFGHL:HGBCAFLE
+ABCEFGHK:HGBCAFEK
+ABCEFGHJ:HGBCAFEJ
+ABCEFGHI:HGBCAFEI
+ABCDIJKL:IJBCADLK
+ABCDHJKL:HJBCADLK
+ABCDHIKL:HIBCADLK
+ABCDHIJL:HJBCADLI
+ABCDHIJK:HJBCADIK
+ABCDGJKL:CJBDAGLK
+ABCDGIKL:IGBCADLK
+ABCDGIJL:CJBDAGLI
+ABCDGIJK:CJBDAGIK
+ABCDGHKL:HGBCADLK
+ABCDGHJL:HGBCADLJ
+ABCDGHJK:HGBCADJK
+ABCDGHIL:HGBCADLI
+ABCDGHIK:HGBCADIK
+ABCDGHIJ:HGBCADIJ
+ABCDFJKL:CJBDAFLK
+ABCDFIKL:CIBDAFLK
+ABCDFIJL:CJBDAFLI
+ABCDFIJK:CJBDAFIK
+ABCDFHKL:HFBCADLK
+ABCDFHJL:CJBDAFLH
+ABCDFHJK:HJBCAFDK
+ABCDFHIL:HFBCADLI
+ABCDFHIK:HFBCADIK
+ABCDFHIJ:HJBCAFDI
+ABCDFGKL:CGBDAFLK
+ABCDFGJL:CGBDAFLJ
+ABCDFGJK:CGBDAFJK
+ABCDFGIL:CGBDAFLI
+ABCDFGIK:CGBDAFIK
+ABCDFGIJ:CGBDAFIJ
+ABCDFGHL:CGBDAFLH
+ABCDFGHK:HGBCAFDK
+ABCDFGHJ:HGBCAFDJ
+ABCDFGHI:HGBCAFDI
+ABCDEJKL:EJBCADLK
+ABCDEIKL:EIBCADLK
+ABCDEIJL:EJBCADLI
+ABCDEIJK:EJBCADIK
+ABCDEHKL:HEBCADLK
+ABCDEHJL:HJBCADLE
+ABCDEHJK:HJBCADEK
+ABCDEHIL:HEBCADLI
+ABCDEHIK:HEBCADIK
+ABCDEHIJ:HJBCADEI
+ABCDEGKL:EGBCADLK
+ABCDEGJL:EGBCADLJ
+ABCDEGJK:EGBCADJK
+ABCDEGIL:EGBCADLI
+ABCDEGIK:EGBCADIK
+ABCDEGIJ:EGBCADIJ
+ABCDEGHL:HGBCADLE
+ABCDEGHK:HGBCADEK
+ABCDEGHJ:HGBCADEJ
+ABCDEGHI:HGBCADEI
+ABCDEFKL:CEBDAFLK
+ABCDEFJL:CJBDAFLE
+ABCDEFJK:CJBDAFEK
+ABCDEFIL:CEBDAFLI
+ABCDEFIK:CEBDAFIK
+ABCDEFIJ:CJBDAFEI
+ABCDEFHL:HFBCADLE
+ABCDEFHK:HEBCAFDK
+ABCDEFHJ:HJBCAFDE
+ABCDEFHI:HEBCAFDI
+ABCDEFGL:CGBDAFLE
+ABCDEFGK:CGBDAFEK
+ABCDEFGJ:CGBDAFEJ
+ABCDEFGI:CGBDAFEI
+ABCDEFGH:HGBCAFDE`;
+
+const ANNEX = {};
+ANNEX_RAW.trim().split('\n').forEach(line => {
+  const [k,v] = line.split(':');
+  ANNEX[k] = v.split('');
+});
+
+const MATCH_MD = {
+  1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,13:1,14:1,15:1,16:1,17:1,18:1,19:1,20:1,21:1,22:1,23:1,24:1,
+  25:2,26:2,27:2,28:2,29:2,30:2,31:2,32:2,33:2,34:2,35:2,36:2,37:2,38:2,39:2,40:2,41:2,42:2,43:2,44:2,45:2,46:2,47:2,48:2,
+  53:3,54:3,49:3,50:3,51:3,52:3,55:3,56:3,57:3,58:3,59:3,60:3,61:3,62:3,63:3,64:3,65:3,66:3,67:3,68:3,69:3,70:3,71:3,72:3
+};
+MATCHES.forEach(m => { m.md = MATCH_MD[m.id]; });
+
+const ROUNDS = {
+  G1: { name: '1-й тур групи', type: 'group', md: 1 },
+  G2: { name: '2-й тур групи', type: 'group', md: 2 },
+  G3: { name: '3-й тур групи', type: 'group', md: 3 },
+  KO1: { name: '1/16 фіналу', type: 'ko', from: 73, to: 88 },
+  KO2: { name: '1/8 фіналу', type: 'ko', from: 89, to: 96 },
+  KO3: { name: '1/4 фіналу', type: 'ko', from: 97, to: 100 },
+  KO4: { name: 'Півфінали', type: 'ko', from: 101, to: 102 },
+  KO5: { name: 'Фінал і 3-є місце', type: 'ko', from: 103, to: 104 }
+};
+const ROUND_ORDER = ['G1','G2','G3','KO1','KO2','KO3','KO4','KO5'];
+
+// Реальні результати плей-оф (оновлюються автоматично)
+const KO_ACTUAL = {};
+
+const ESPN_ABBREV = {
+  USA:'USA', ENG:'ENG', KOR:'KOR', CZE:'CZE', BIH:'BIH', SUI:'SUI', BRA:'BRA', MAR:'MAR',
+  HAI:'HAI', SCO:'SCO', PAR:'PAR', AUS:'AUS', TUR:'TUR', GER:'GER', CUW:'CUW', CIV:'CIV',
+  ECU:'ECU', NED:'NED', JPN:'JPN', SWE:'SWE', TUN:'TUN', BEL:'BEL', EGY:'EGY', IRN:'IRN',
+  NZL:'NZL', ESP:'ESP', CPV:'CPV', KSA:'KSA', URU:'URU', FRA:'FRA', SEN:'SEN', IRQ:'IRQ',
+  NOR:'NOR', ARG:'ARG', ALG:'ALG', AUT:'AUT', JOR:'JOR', POR:'POR', COD:'COD', UZB:'UZB',
+  COL:'COL', CRO:'CRO', GHA:'GHA', PAN:'PAN', MEX:'MEX', RSA:'RSA', QAT:'QAT'
+};
+
+let scores = {};
+let sealedRounds = {};
+let activeGroupRound = 'G1';
+let activeKoRound = 'KO1';
+let lastTicket = '';
+
+const FLAG_CDN = 'https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/flags/4x3';
+
+function flagSrc(iso) {
+  return `${FLAG_CDN}/${iso}.svg`;
+}
+
+function flagHtml(code, size) {
+  size = size || 'md';
+  const t = TEAMS[code];
+  if (!t?.iso) return '';
+  const px = size === 'lg' ? 40 : size === 'sm' ? 22 : 28;
+  const h = Math.round(px * 0.75);
+  const src = flagSrc(t.iso);
+  return `<img class="flag flag-${size}" src="${src}" alt="${t.n}" width="${px}" height="${h}" loading="lazy" data-iso="${t.iso}" data-size="${size}">`;
+}
+
+function teamLabel(code) { return TEAMS[code] ? TEAMS[code].n : code; }
+
+function t(code) { return TEAMS[code] ? `${flagHtml(code)} ${TEAMS[code].n}` : code; }
+
+function tShort(code) {
+  if (!TEAMS[code]) return '?';
+  return `${flagHtml(code)}<span class="team-name">${TEAMS[code].n}</span>`;
+}
+
+function tCell(code, away) {
+  const cls = away ? 'team-cell away' : 'team-cell';
+  return `<div class="${cls}">${tShort(code)}</div>`;
+}
+
+function getActual(m) {
+  if (typeof m === 'number') {
+    if (m <= 72) m = MATCHES.find(x => x.id === m);
+    else return KO_ACTUAL[m] || null;
+  }
+  if (m.done && m.hs != null && m.as != null) return { h: m.hs, a: m.as };
+  return null;
+}
+
+function scorePrediction(ph, pa, ah, aa) {
+  ph = +ph; pa = +pa; ah = +ah; aa = +aa;
+  if (ph === ah && pa === aa) return 3;
+  const pd = ph - pa, ad = ah - aa;
+  if (pd === ad) return 2;
+  const po = pd > 0 ? 'W' : pd < 0 ? 'L' : 'D';
+  const ao = ad > 0 ? 'W' : ad < 0 ? 'L' : 'D';
+  return po === ao ? 1 : 0;
+}
+
+function getRoundMatchIds(roundId) {
+  const r = ROUNDS[roundId];
+  if (r.type === 'group') return MATCHES.filter(m => m.md === r.md).map(m => m.id);
+  const ids = [];
+  for (let i = r.from; i <= r.to; i++) ids.push(i);
+  return ids;
+}
+
+function isRoundSealed(roundId) { return !!sealedRounds[roundId]; }
+
+function getCurrentOpenRound() {
+  return ROUND_ORDER.find(r => !isRoundSealed(r)) || null;
+}
+
+function isPredictionLocked(roundId) { return isRoundSealed(roundId); }
+
+function canEditGroupMatch(m) {
+  const rid = 'G' + m.md;
+  if (m.done) return false;
+  if (isRoundSealed(rid)) return false;
+  return rid === getCurrentOpenRound();
+}
+
+function getKoRoundId(matchId) {
+  for (const [rid, r] of Object.entries(ROUNDS)) {
+    if (r.type === 'ko' && matchId >= r.from && matchId <= r.to) return rid;
+  }
+  return null;
+}
+
+function canEditKoMatch(id) {
+  const rid = getKoRoundId(id);
+  if (!rid || isRoundSealed(rid)) return false;
+  if (KO_ACTUAL[id]) return false;
+  return rid === getCurrentOpenRound();
+}
+
+function getScore(id) {
+  if (id <= 72) {
+    const m = MATCHES.find(x => x.id === id);
+    if (m?.done) return { h: m.hs, a: m.as, actual: true };
+  } else if (KO_ACTUAL[id]) return { ...KO_ACTUAL[id], actual: true };
+  const rid = id <= 72 ? 'G' + MATCHES.find(m => m.id === id)?.md : getKoRoundId(id);
+  if (rid && isRoundSealed(rid)) {
+    const p = sealedRounds[rid].scores?.[id];
+    if (p) return { ...p, locked: true };
+  }
+  return scores[id] || { h: '', a: '' };
+}
+
+function setScore(id, side, val) {
+  if (!scores[id]) scores[id] = { h: '', a: '' };
+  scores[id][side] = val;
+}
+
+function getKoWinnerFromScore(id, home, away) {
+  const sc = getScore(id);
+  if (sc.h === '' || sc.a === '' || sc.h == null || sc.a == null) return null;
+  const h = +sc.h, a = +sc.a;
+  if (isNaN(h) || isNaN(a)) return null;
+  if (h > a) return home;
+  if (a > h) return away;
+  return sc.adv || null;
+}
+
+function calcRoundPoints(roundId) {
+  const s = sealedRounds[roundId];
+  if (!s) return { points: 0, details: [] };
+  let points = 0;
+  const details = [];
+  const r = ROUNDS[roundId];
+
+  if (r.type === 'group') {
+    getRoundMatchIds(roundId).forEach(id => {
+      const m = MATCHES.find(x => x.id === id);
+      const pred = s.scores?.[id];
+      const act = getActual(m);
+      if (!pred || pred.h === '' || pred.a === '' || !act) return;
+      const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
+      points += pts;
+      details.push({ id, label: `${teamLabel(m.h)} ${pred.h}:${pred.a} ${teamLabel(m.a)}`, actual: `${act.h}:${act.a}`, pts });
+    });
+  } else {
+    for (let id = r.from; id <= r.to; id++) {
+      const pred = s.scores?.[id];
+      const act = KO_ACTUAL[id];
+      if (!pred || pred.h === '' || pred.a === '' || !act) continue;
+      const teams = getKoTeamsForMatch(id, buildR32Teams());
+      const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
+      points += pts;
+      const lbl = teams.h && teams.a ? `${teamLabel(teams.h)} ${pred.h}:${pred.a} ${teamLabel(teams.a)}` : `M${id} ${pred.h}:${pred.a}`;
+      details.push({ id, label: lbl, actual: `${act.h}:${act.a}`, pts });
+    }
+  }
+  return { points, details };
+}
+
+function calcTotalPoints() {
+  let total = 0;
+  const byRound = {};
+  ROUND_ORDER.forEach(rid => {
+    if (!isRoundSealed(rid)) return;
+    const { points } = calcRoundPoints(rid);
+    byRound[rid] = points;
+    total += points;
+  });
+  return { total, byRound };
+}
+
+function initScores() {
+  MATCHES.forEach(m => {
+    if (!m.done && !scores[m.id]) scores[m.id] = { h: '', a: '' };
+  });
+  for (let id = 73; id <= 104; id++) {
+    if (!KO_ACTUAL[id] && !scores[id]) scores[id] = { h: '', a: '' };
+  }
+}
+
+function espnToCode(abbr) {
+  return ESPN_ABBREV[abbr] || (TEAMS[abbr] ? abbr : null);
+}
+
+function findMatchByTeams(home, away) {
+  let m = MATCHES.find(x => x.h === home && x.a === away);
+  if (m) return { id: m.id, swap: false };
+  m = MATCHES.find(x => x.h === away && x.a === home);
+  if (m) return { id: m.id, swap: true };
+  return null;
+}
+
+async function fetchResults(manual) {
+  const el = document.getElementById('sync-status');
+  el.textContent = 'Оновлення результатів...';
+  el.style.color = 'var(--accent)';
+  try {
+    const url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    let updated = 0;
+    const events = data.events || [];
+
+    events.forEach(ev => {
+      const comp = ev.competitions?.[0];
+      if (!comp) return;
+      const st = comp.status?.type;
+      if (!st?.completed || st.state !== 'post') return;
+      const comps = comp.competitors || [];
+      const home = comps.find(c => c.homeAway === 'home');
+      const away = comps.find(c => c.homeAway === 'away');
+      if (!home || !away) return;
+      const hCode = espnToCode(home.team?.abbreviation);
+      const aCode = espnToCode(away.team?.abbreviation);
+      if (!hCode || !aCode) return;
+      let hs = +home.score, as = +away.score;
+      if (isNaN(hs) || isNaN(as)) return;
+
+      const found = findMatchByTeams(hCode, aCode);
+      if (found) {
+        if (found.swap) { const t = hs; hs = as; as = t; }
+        const m = MATCHES.find(x => x.id === found.id);
+        if (m && (!m.done || m.hs !== hs || m.as !== as)) {
+          m.done = true; m.hs = hs; m.as = as;
+          updated++;
+        }
+        return;
+      }
+
+      // Плей-оф: шукаємо серед відомих пар (коли з'являться в сітці)
+      for (let id = 73; id <= 104; id++) {
+        const r32 = buildR32Teams();
+        const teams = getKoTeamsForMatch(id, r32);
+        if (!teams.h || !teams.a) continue;
+        if ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode)) {
+          const swap = teams.h !== hCode;
+          const fh = swap ? as : hs, fa = swap ? hs : as;
+          if (!KO_ACTUAL[id] || KO_ACTUAL[id].h !== fh || KO_ACTUAL[id].a !== fa) {
+            KO_ACTUAL[id] = { h: fh, a: fa };
+            updated++;
+          }
+          break;
+        }
+      }
+    });
+
+    const now = new Date().toLocaleString('uk-UA');
+    el.textContent = `Результати з ESPN · оновлено ${now} · змінено ${updated} матч(ів)`;
+    el.style.color = 'var(--accent)';
+    renderAll();
+    if (manual && updated === 0) alert('Нових результатів немає — все вже актуально.');
+  } catch (e) {
+    el.textContent = 'Не вдалося оновити (потрібен інтернет). Результати з останнього завантаження.';
+    el.style.color = '#ff8a8a';
+    if (manual) alert('Помилка оновлення: ' + e.message + '\nПеревір інтернет-з\'єднання.');
+  }
+}
+
+function getMatchScoreForStandings(m) {
+  if (m.done) return { h: m.hs, a: m.as };
+  const rid = 'G' + m.md;
+  if (isRoundSealed(rid)) {
+    const pred = sealedRounds[rid].scores?.[m.id];
+    if (pred && pred.h !== '' && pred.a !== '') return { h: +pred.h, a: +pred.a };
+  }
+  const sc = scores[m.id];
+  if (sc && sc.h !== '' && sc.a !== '') return { h: +sc.h, a: +sc.a };
+  return null;
+}
+
+function getGroupStats(g) {
+  const teams = GROUPS[g];
+  const stats = {};
+  teams.forEach(tc => stats[tc] = { pts:0,gf:0,ga:0,gd:0,played:0,h2h:{} });
+
+  MATCHES.filter(m => m.g === g).forEach(m => {
+    const sc = getMatchScoreForStandings(m);
+    if (!sc) return;
+    const h = sc.h, a = sc.a;
+    stats[m.h].played++; stats[m.a].played++;
+    stats[m.h].gf += h; stats[m.h].ga += a;
+    stats[m.a].gf += a; stats[m.a].ga += h;
+    if (h > a) { stats[m.h].pts += 3; stats[m.h].h2h[m.a] = (stats[m.h].h2h[m.a]||0)+3; }
+    else if (a > h) { stats[m.a].pts += 3; stats[m.a].h2h[m.h] = (stats[m.a].h2h[m.h]||0)+3; }
+    else { stats[m.h].pts++; stats[m.a].pts++; stats[m.h].h2h[m.a]=(stats[m.h].h2h[m.a]||0)+1; stats[m.a].h2h[m.h]=(stats[m.a].h2h[m.h]||0)+1; }
+  });
+  Object.values(stats).forEach(s => s.gd = s.gf - s.ga);
+  return stats;
+}
+
+function compareTeams(a, b, stats, groupTeams) {
+  if (stats[a].pts !== stats[b].pts) return stats[b].pts - stats[a].pts;
+  const tied = groupTeams.filter(tc => stats[tc].pts === stats[a].pts);
+  if (tied.length === 2) {
+    const ha = stats[a].h2h[b] || 0, hb = stats[b].h2h[a] || 0;
+    if (ha !== hb) return hb - ha;
+  }
+  if (stats[a].gd !== stats[b].gd) return stats[b].gd - stats[a].gd;
+  if (stats[a].gf !== stats[b].gf) return stats[b].gf - stats[a].gf;
+  return (TEAMS[a]?.r || 99) - (TEAMS[b]?.r || 99);
+}
+
+function getStandings(g) {
+  const stats = getGroupStats(g);
+  return [...GROUPS[g]].sort((a,b) => compareTeams(a,b,stats,GROUPS[g]));
+}
+
+function allGroupDone() {
+  return MATCHES.filter(m => !m.done).every(m => {
+    const rid = 'G' + m.md;
+    if (isRoundSealed(rid)) {
+      const p = sealedRounds[rid].scores?.[m.id];
+      return p && p.h !== '' && p.a !== '';
+    }
+    const s = scores[m.id];
+    return s && s.h !== '' && s.a !== '';
+  });
+}
+
+function getAdvancingThirds() {
+  const thirds = [];
+  'ABCDEFGHIJKL'.split('').forEach(g => {
+    const st = getStandings(g);
+    thirds.push({ g, team: st[2], stats: getGroupStats(g)[st[2]] });
+  });
+  thirds.sort((a,b) => {
+    if (a.stats.pts !== b.stats.pts) return b.stats.pts - a.stats.pts;
+    if (a.stats.gd !== b.stats.gd) return b.stats.gd - a.stats.gd;
+    if (a.stats.gf !== b.stats.gf) return b.stats.gf - a.stats.gf;
+    return (TEAMS[a.team]?.r||99) - (TEAMS[b.team]?.r||99);
+  });
+  return thirds.slice(0,8);
+}
+
+function getThirdMapping() {
+  const adv = getAdvancingThirds();
+  const key = adv.map(x => x.g).sort().join('');
+  const slots = ANNEX[key];
+  const map = {};
+  if (slots) {
+    THIRD_SLOTS.forEach((slot, i) => {
+      const grp = slots[i];
+      const entry = adv.find(x => x.g === grp);
+      if (entry) map[slot] = entry.team;
+    });
+  }
+  return { map, adv, key };
+}
+
+function resolveSlot(slot, standings, thirdMap) {
+  if (slot.t === 'pos') {
+    const st = standings[slot.g];
+    return st ? st[slot.p - 1] : null;
+  }
+  if (slot.t === '3rd') return thirdMap[slot.s] || null;
+  return null;
+}
+
+function getKoTeam(ref, r32teams) {
+  if (!ref) return null;
+  if (ref.startsWith('W') || ref.startsWith('L')) {
+    const id = +ref.slice(1);
+    const teams = getKoTeamsForMatch(id, r32teams);
+    const w = getKoWinnerFromScore(id, teams?.h, teams?.a);
+    if (ref.startsWith('L') && w && teams?.h && teams?.a) {
+      return w === teams.h ? teams.a : teams.h;
+    }
+    return w || null;
+  }
+  return null;
+}
+
+function getKoTeamsForMatch(id, r32teams) {
+  if (id >= 73 && id <= 88) return r32teams[id] || { h: null, a: null };
+  const m = findKoMatch(id);
+  if (!m) return { h: null, a: null };
+  return { h: getKoTeam(m.h, r32teams), a: getKoTeam(m.a, r32teams) };
+}
+
+function findKoMatch(id) {
+  if (id >= 73 && id <= 88) return R32.find(m => m.id === id);
+  for (const round of KO_TREE) {
+    const m = round.matches.find(x => x.id === id);
+    if (m) return m;
+  }
+  return null;
+}
+
+function buildR32Teams() {
+  const standings = {};
+  'ABCDEFGHIJKL'.split('').forEach(g => standings[g] = getStandings(g));
+  const { map } = getThirdMapping();
+  const teams = {};
+  R32.forEach(m => {
+    teams[m.id] = {
+      h: resolveSlot(m.h, standings, map),
+      a: resolveSlot(m.a, standings, map)
+    };
+  });
+  return teams;
+}
+
+function renderRoundTabs() {
+  const gTabs = document.getElementById('group-round-tabs');
+  gTabs.innerHTML = '';
+  ['G1','G2','G3'].forEach(rid => {
+    const btn = document.createElement('button');
+    btn.className = 'round-tab' + (activeGroupRound === rid ? ' active' : '') + (isRoundSealed(rid) ? ' sealed' : '');
+    btn.textContent = ROUNDS[rid].name;
+    btn.onclick = () => { activeGroupRound = rid; renderAll(); };
+    gTabs.appendChild(btn);
+  });
+
+  const koTabs = document.getElementById('ko-round-tabs');
+  koTabs.innerHTML = '';
+  ['KO1','KO2','KO3','KO4','KO5'].forEach(rid => {
+    const btn = document.createElement('button');
+    btn.className = 'round-tab' + (activeKoRound === rid ? ' active' : '') + (isRoundSealed(rid) ? ' sealed' : '');
+    btn.textContent = ROUNDS[rid].name;
+    btn.onclick = () => { activeKoRound = rid; renderAll(); };
+    koTabs.appendChild(btn);
+  });
+}
+
+function renderSealBars() {
+  const open = getCurrentOpenRound();
+  const gBar = document.getElementById('group-seal-bar');
+  const kBar = document.getElementById('ko-seal-bar');
+
+  function fillBar(el, roundId) {
+    if (!roundId || !roundId.startsWith(el === gBar ? 'G' : 'KO')) {
+      el.innerHTML = `<span class="hint">${isRoundSealed(activeGroupRound) && el === gBar ? 'Цей тур закрито — прогноз зафіксовано у квитку' : ''}${isRoundSealed(activeKoRound) && el === kBar ? 'Цей тур закрито — прогноз зафіксовано у квитку' : ''}</span>`;
+      return;
+    }
+    const missing = countMissingInRound(roundId);
+    const sealed = isRoundSealed(roundId);
+    const pts = sealed ? calcRoundPoints(roundId).points : 0;
+    el.innerHTML = sealed
+      ? `<span class="hint">🔒 ${ROUNDS[roundId].name} закрито · <strong style="color:var(--gold)">${pts} очок</strong> за зіграні матчі цього туру</span>`
+      : `<span class="hint">Активний тур: <strong>${ROUNDS[roundId].name}</strong>${missing ? ` · залишилось заповнити: ${missing}` : ' · готово до закриття!'}</span>
+         <button class="gold" onclick="sealRound('${roundId}')" ${missing ? 'disabled style="opacity:.5"' : ''}>🔒 Закрити тур і зберегти PDF-купон</button>`;
+  }
+
+  if (open && open.startsWith('G')) fillBar(gBar, open);
+  else gBar.innerHTML = `<span class="hint">${isRoundSealed(activeGroupRound) ? '🔒 ' + ROUNDS[activeGroupRound].name + ' закрито' : 'Груповий етап завершено'}</span>`;
+
+  if (open && open.startsWith('KO')) fillBar(kBar, open);
+  else kBar.innerHTML = `<span class="hint">${isRoundSealed(activeKoRound) ? '🔒 ' + ROUNDS[activeKoRound].name + ' закрито' : 'Плей-оф: обери тур вище'}</span>`;
+}
+
+function isPredFilled(sc) {
+  if (!sc) return false;
+  if (sc.h === '' || sc.h == null || sc.a === '' || sc.a == null) return false;
+  return !isNaN(+sc.h) && !isNaN(+sc.a);
+}
+
+function countMissingInRound(roundId) {
+  const r = ROUNDS[roundId];
+  if (r.type === 'group') {
+    return MATCHES.filter(m => m.md === r.md && !m.done).filter(m => !isPredFilled(scores[m.id])).length;
+  }
+  let miss = 0;
+  for (let id = r.from; id <= r.to; id++) {
+    if (KO_ACTUAL[id]) continue;
+    const sc = scores[id];
+    if (!isPredFilled(sc)) miss++;
+    else if (+sc.h === +sc.a && !sc.adv) miss++;
+  }
+  return miss;
+}
+
+function getDisplayScore(m) {
+  return getScore(m.id);
+}
+
+function getSealedPred(id) {
+  const rid = id <= 72 ? 'G' + MATCHES.find(m => m.id === id)?.md : getKoRoundId(id);
+  if (!rid || !isRoundSealed(rid)) return null;
+  const p = sealedRounds[rid].scores?.[id];
+  return p && p.h !== '' && p.a !== '' ? p : null;
+}
+
+function scoreCompareHtml(id, m) {
+  const pred = getSealedPred(id);
+  const act = getActual(m || id);
+  if (!pred) return '';
+  if (!act) {
+    const adv = pred.adv ? ` · → ${tShort(pred.adv)}` : '';
+    return `<div class="score-compare"><span class="pred" style="text-decoration:none;opacity:1;color:var(--accent)">${pred.h}:${pred.a}</span><span style="font-size:.65rem;color:var(--muted)">прогноз${adv}</span></div>`;
+  }
+  const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
+  const cls = pts === 3 || pts === 2 ? 'good' : pts === 1 ? 'ok' : 'miss';
+  const adv = pred.adv && +pred.h === +pred.a ? ` <span style="font-size:.65rem;color:var(--muted)">(→ ${tShort(pred.adv)})</span>` : '';
+  return `<div class="score-compare">
+    <span class="pred">${pred.h}:${pred.a}</span>
+    <span class="arrow">→</span>
+    <span class="act ${cls}">${act.h}:${act.a}</span>
+    <span class="pts-badge pts-${pts}">+${pts}</span>${adv}
+  </div>`;
+}
+
+function getRoundMatchLines(roundId) {
+  const r = ROUNDS[roundId];
+  const lines = [];
+  if (r.type === 'group') {
+    MATCHES.filter(m => m.md === r.md).forEach(m => {
+      const pred = sealedRounds[roundId]?.scores?.[m.id];
+      if (!pred || pred.h === '') return;
+      const act = getActual(m);
+      const pts = act ? scorePrediction(pred.h, pred.a, act.h, act.a) : null;
+      lines.push({ n: m.id, label: `${teamLabel(m.h)} — ${teamLabel(m.a)}`, pred, act, pts, adv: pred.adv });
+    });
+  } else {
+    const r32 = buildR32Teams();
+    for (let id = r.from; id <= r.to; id++) {
+      const pred = sealedRounds[roundId]?.scores?.[id];
+      if (!pred || pred.h === '') continue;
+      const teams = getKoTeamsForMatch(id, r32);
+      const label = teams.h && teams.a ? `${teamLabel(teams.h)} — ${teamLabel(teams.a)}` : 'M' + id;
+      const act = KO_ACTUAL[id] || null;
+      const pts = act ? scorePrediction(pred.h, pred.a, act.h, act.a) : null;
+      lines.push({ n: id, label, pred, act, pts, adv: pred.adv });
+    }
+  }
+  return lines;
+}
+
+function buildRoundTicketString(roundId) {
+  return buildCumulativeTicketString();
+}
+
+function getPlayerName() {
+  return (document.getElementById('playerName').value || '').trim();
+}
+
+function ensurePlayerNameBeforeSeal() {
+  const el = document.getElementById('playerName');
+  let name = getPlayerName();
+  if (name) return name;
+  if (!ROUND_ORDER.some(isRoundSealed)) {
+    const entered = prompt('Як тебе звати?\n\nІм\'я з\'явиться на купоні та в таблиці лідерів.');
+    if (!entered?.trim()) {
+      alert('Без імені не можна закрити тур і згенерувати купон.');
+      el.focus();
+      return null;
+    }
+    el.value = entered.trim();
+    saveData(true);
+    return entered.trim();
+  }
+  alert('Введи ім\'я у полі зверху або завантаж попередній купон.');
+  el.focus();
+  return null;
+}
+
+function updatePlayerNameField() {
+  const el = document.getElementById('playerName');
+  const locked = ROUND_ORDER.some(isRoundSealed);
+  el.readOnly = locked;
+  el.placeholder = locked ? el.value || 'Гравець' : 'Твоє ім\'я...';
+  el.style.opacity = locked ? '0.9' : '';
+  el.title = locked ? 'Ім\'я зафіксовано в купоні. «Скинути все» — щоб змінити.' : '';
+}
+
+function captureUiState() {
+  const el = document.activeElement;
+  const state = { scrollY: window.scrollY, scrollX: window.scrollX };
+  if (el?.matches?.('input[data-mid], input[data-koid]')) {
+    state.focus = {
+      sel: el.dataset.mid
+        ? `input[data-mid="${el.dataset.mid}"][data-side="${el.dataset.side}"]`
+        : `input[data-koid="${el.dataset.koid}"][data-side="${el.dataset.side}"]`,
+      start: el.selectionStart,
+      end: el.selectionEnd
+    };
+  }
+  return state;
+}
+
+function restoreUiState(state) {
+  if (!state) return;
+  window.scrollTo(state.scrollX, state.scrollY);
+  if (state.focus) {
+    requestAnimationFrame(() => {
+      const inp = document.querySelector(state.focus.sel);
+      if (inp) {
+        inp.focus({ preventScroll: true });
+        try { inp.setSelectionRange(state.focus.start, state.focus.end); } catch (e) {}
+      }
+    });
+  }
+}
+
+function normalizeB64(b64) {
+  return (b64 || '').replace(/ /g, '+').replace(/[^A-Za-z0-9+/=]/g, '');
+}
+
+function tryDecodeCouponB64(b64) {
+  b64 = normalizeB64(b64);
+  const tries = [b64];
+  for (let len = b64.length; len >= 24; len--) tries.push(b64.slice(0, len));
+  for (const attempt of tries) {
+    let s = attempt;
+    const pad = s.length % 4 ? '='.repeat(4 - (s.length % 4)) : '';
+    try {
+      const data = JSON.parse(decodeURIComponent(escape(atob(s + pad))));
+      if (data.sealedRounds || data.v) return data;
+    } catch (e) { /* наступна спроба */ }
+  }
+  return null;
+}
+
+function decodeCouponB64(b64) {
+  const data = tryDecodeCouponB64(b64);
+  if (data) return data;
+  throw new Error('Не вдалося розкодувати купон. Скопіюй код повністю або натисни «З коду внизу ↑».');
+}
+
+/** Знаходить у тексті один або кілька купонів (багаторядковий PDF/копіпаст теж ок) */
+function extractAllCoupons(raw) {
+  if (!raw?.trim()) return [];
+  const re = /FIFA26C\||FIFA26R\||FIFA26\|/g;
+  const starts = [];
+  let m;
+  while ((m = re.exec(raw)) !== null) starts.push(m.index);
+  if (!starts.length) {
+    try {
+      const one = normalizeCouponText(raw);
+      return one ? [one] : [];
+    } catch (e) { return []; }
+  }
+  const out = [];
+  for (let i = 0; i < starts.length; i++) {
+    const chunk = raw.slice(starts[i], starts[i + 1]);
+    try {
+      const code = normalizeCouponText(chunk);
+      if (code) out.push(code);
+    } catch (e) { /* пропускаємо пошкоджений фрагмент */ }
+  }
+  return out;
+}
+
+function normalizeCouponText(raw) {
+  if (!raw) return '';
+  raw = raw.trim();
+  const idxC = raw.indexOf('FIFA26C|');
+  if (idxC >= 0) return 'FIFA26C|' + normalizeB64(raw.slice(idxC + 8));
+  const idxR = raw.indexOf('FIFA26R|');
+  if (idxR >= 0) {
+    const rest = raw.slice(idxR + 8);
+    const pipe = rest.indexOf('|');
+    if (pipe < 0) throw new Error('Пошкоджений купон FIFA26R');
+    return 'FIFA26R|' + rest.slice(0, pipe + 1) + normalizeB64(rest.slice(pipe + 1));
+  }
+  const idx = raw.indexOf('FIFA26|');
+  if (idx >= 0) return 'FIFA26|' + normalizeB64(raw.slice(idx + 7));
+  return normalizeB64(raw);
+}
+
+function buildCumulativeTicketString() {
+  const sealed = ROUND_ORDER.filter(isRoundSealed);
+  if (!sealed.length) return '';
+  const payload = {
+    v: 3,
+    name: getPlayerName() || 'Гравець',
+    sealedRounds,
+    lastRound: sealed[sealed.length - 1],
+    updatedAt: new Date().toISOString()
+  };
+  return 'FIFA26C|' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+
+function canonicalCouponCode(data) {
+  const payload = {
+    v: data.v || 3,
+    name: data.name || data.playerName || 'Гравець',
+    sealedRounds: data.sealedRounds,
+    lastRound: data.lastRound || ROUND_ORDER.filter(r => data.sealedRounds?.[r]).pop(),
+    updatedAt: data.updatedAt || new Date().toISOString()
+  };
+  return 'FIFA26C|' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+
+function parseCouponRaw(raw) {
+  const coupons = extractAllCoupons(raw);
+  if (!coupons.length) throw new Error('Порожній код');
+  const code = coupons[0];
+
+  if (code.startsWith('FIFA26C|')) {
+    const data = decodeCouponB64(code.slice(8));
+    if (!data.sealedRounds) throw new Error('bad cumulative');
+    return { type: 'cumulative', code: canonicalCouponCode(data), data };
+  }
+  if (code.startsWith('FIFA26R|')) {
+    const parts = code.split('|');
+    const data = decodeCouponB64(parts.slice(2).join('|'));
+    if (!data.sealedRounds) throw new Error('bad round');
+    const merged = { ...data, sealedRounds: data.sealedRounds };
+    return { type: 'round', code: canonicalCouponCode(merged), data, roundId: parts[1] };
+  }
+  if (code.startsWith('FIFA26|')) {
+    const data = decodeCouponB64(code.slice(7));
+    if (!data.sealedRounds) throw new Error('bad full');
+    return { type: 'full', code: canonicalCouponCode(data), data };
+  }
+  throw new Error('Код має починатися з FIFA26C|, FIFA26R| або FIFA26|');
+}
+
+function validateSealedSequence(sealed) {
+  const keys = ROUND_ORDER.filter(r => sealed[r]);
+  for (let i = 0; i < keys.length; i++) {
+    if (keys[i] !== ROUND_ORDER[i]) return `Некоректний купон: пропущено тур «${ROUNDS[ROUND_ORDER[i]].name}»`;
+  }
+  return null;
+}
+
+function mergeCouponSealed(parsed) {
+  const incoming = parsed.data.sealedRounds || {};
+  if (parsed.type === 'cumulative' || parsed.type === 'full') {
+    const err = validateSealedSequence(incoming);
+    if (err) throw new Error(err);
+    return { ...incoming };
+  }
+  const rid = parsed.roundId || parsed.data.round || Object.keys(incoming)[0];
+  if (!rid) throw new Error('bad round id');
+  const ridIdx = ROUND_ORDER.indexOf(rid);
+  if (ridIdx < 0) throw new Error('unknown round');
+  const merged = { ...sealedRounds };
+  for (let i = 0; i < ridIdx; i++) {
+    if (!merged[ROUND_ORDER[i]] && !incoming[ROUND_ORDER[i]]) {
+      throw new Error(`Спочатку завантаж купон за «${ROUNDS[ROUND_ORDER[i]].name}»`);
+    }
+  }
+  Object.assign(merged, incoming);
+  const err = validateSealedSequence(merged);
+  if (err) throw new Error(err);
+  return merged;
+}
+
+async function extractTextWithPdfJs(buf) {
+  if (typeof pdfjsLib === 'undefined') return '';
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+  const chunks = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    chunks.push(content.items.map(item => item.str).join(''));
+  }
+  return chunks.join('');
+}
+
+function extractTextFromPdfBinary(buf) {
+  const latin = new TextDecoder('latin1').decode(buf);
+  const parts = [];
+
+  const idx = latin.indexOf('FIFA26');
+  if (idx >= 0) parts.push(latin.slice(idx, idx + 250000));
+
+  let acc = '';
+  let inCoupon = false;
+  const strRe = /\(([^)\\]*(?:\\.[^)\\]*)*)\)/g;
+  let m;
+  while ((m = strRe.exec(latin)) !== null) {
+    const s = m[1]
+      .replace(/\\([nrtbf()\\])/g, (_, c) => ({ n: '\n', r: '\r', t: '\t', b: '\b', f: '\f' }[c] || c))
+      .replace(/\\(\d{1,3})/g, (_, o) => String.fromCharCode(parseInt(o, 8)));
+    if (/FIFA26[CR]?\|/.test(s)) {
+      acc = s;
+      inCoupon = true;
+    } else if (inCoupon && /^[A-Za-z0-9+/=\s]+$/.test(s)) {
+      acc += s;
+    } else if (inCoupon && acc.length > 30) {
+      parts.push(acc);
+      acc = '';
+      inCoupon = false;
+    }
+  }
+  if (acc) parts.push(acc);
+
+  return parts.join('\n');
+}
+
+async function extractCouponsFromPdf(file) {
+  const buf = await file.arrayBuffer();
+  const attempts = [];
+
+  try {
+    const pdfText = await extractTextWithPdfJs(buf);
+    if (pdfText?.includes('FIFA26')) attempts.push(pdfText);
+  } catch (e) { /* pdf.js недоступний або файл пошкоджений */ }
+
+  const binaryText = extractTextFromPdfBinary(buf);
+  if (binaryText) attempts.push(binaryText);
+
+  for (const raw of attempts) {
+    const coupons = extractAllCoupons(raw);
+    if (coupons.length) return coupons;
+  }
+  return [];
+}
+
+async function extractCouponTextFromPdf(file) {
+  const coupons = await extractCouponsFromPdf(file);
+  return coupons[0] || null;
+}
+
+async function extractCouponCodeFromPdf(file) {
+  const coupons = await extractCouponsFromPdf(file);
+  return coupons[0] || null;
+}
+
+async function importCouponPdf(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+  input.value = '';
+  const status = document.getElementById('import-status');
+  status.textContent = 'Читаю PDF...';
+  status.style.color = 'var(--muted)';
+  try {
+    const coupons = await extractCouponsFromPdf(file);
+    if (!coupons.length) {
+      throw new Error('Код FIFA26 не знайдено в PDF.\n\nСпробуй:\n• «З коду внизу ↑» після закриття туру\n• або скопіюй код з PDF вручну');
+    }
+    document.getElementById('ticketInput').value = coupons[0];
+    importTicket();
+  } catch (e) {
+    status.textContent = '❌ ' + e.message.split('\n')[0];
+    status.style.color = '#ff8a8a';
+    alert(e.message);
+  }
+}
+
+function withSealedSnapshot(snap, fn) {
+  const prev = sealedRounds;
+  sealedRounds = snap;
+  try { return fn(); }
+  finally { sealedRounds = prev; }
+}
+
+function calcTotalPointsFromSnap(snap) {
+  return withSealedSnapshot(snap, () => calcTotalPoints());
+}
+
+function buildRoundSectionHtml(roundId) {
+  const r = ROUNDS[roundId];
+  const snap = sealedRounds[roundId];
+  const sealedAt = snap?.sealedAt ? new Date(snap.sealedAt).toLocaleDateString('uk-UA') : '—';
+  const roundPts = calcRoundPoints(roundId).points;
+  const lines = getRoundMatchLines(roundId);
+  const rows = lines.map((ln, i) => {
+    const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
+    const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
+    const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
+    return `<tr><td class="n">${i + 1}</td><td class="match">${ln.label}</td><td class="pred">${predStr}</td><td class="res">${resStr}</td><td class="pts">${ptsStr}</td></tr>`;
+  }).join('');
+  let extra = '';
+  if (roundId === 'KO1') {
+    const { adv } = getThirdMapping();
+    extra = `<div class="extra"><strong>8×3-є місце:</strong> ${adv.map(x => `${x.g}: ${teamLabel(x.team)}`).join(' · ')}</div>`;
+  }
+  return `<div class="round-block">
+    <div class="round-title">── ${r.name} · ${sealedAt} · ${roundPts} оч. ──</div>
+    ${extra}
+    <table><tr><th>#</th><th>Матч</th><th>Прогноз</th><th>Результат</th><th>Очки</th></tr>${rows}</table>
+  </div>`;
+}
+
+function buildCouponDocument(roundId) {
+  const name = document.getElementById('playerName').value || 'Гравець';
+  const sealedList = ROUND_ORDER.filter(isRoundSealed);
+  const latest = roundId || sealedList[sealedList.length - 1];
+  const r = ROUNDS[latest];
+  const dateStr = new Date().toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const code = buildCumulativeTicketString();
+  const { total, byRound } = calcTotalPoints();
+  const sections = sealedList.map(rid => buildRoundSectionHtml(rid)).join('');
+  const totalsLine = sealedList.map(rid => `${ROUNDS[rid].name}: ${byRound[rid] || 0}`).join(' · ');
+
+  return `<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"><title>Купон — ${name}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Courier New', Consolas, monospace; font-size: 10px; color: #111; background: #fff; padding: 10px; max-width: 80mm; margin: 0 auto; }
+  .slip { border: 2px dashed #333; padding: 10px 8px; }
+  .head { text-align: center; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 8px; }
+  .head h1 { font-size: 12px; letter-spacing: 1px; }
+  .head h2 { font-size: 10px; font-weight: normal; margin-top: 3px; }
+  .meta { margin-bottom: 8px; line-height: 1.5; font-size: 10px; }
+  .meta strong { display: inline-block; min-width: 58px; }
+  .round-block { margin: 10px 0; page-break-inside: avoid; }
+  .round-title { font-weight: bold; text-align: center; margin: 6px 0; font-size: 9px; }
+  table { width: 100%; border-collapse: collapse; font-size: 9px; }
+  th { border-bottom: 1px solid #333; text-align: left; padding: 2px; font-size: 8px; }
+  td { padding: 2px; border-bottom: 1px dotted #ccc; vertical-align: top; }
+  .n { width: 12px; color: #666; }
+  .pred, .res { text-align: center; white-space: nowrap; }
+  .pts { text-align: center; font-weight: bold; }
+  .extra { font-size: 8px; margin: 4px 0; padding: 4px; border: 1px solid #ccc; }
+  .totals { border-top: 2px solid #333; padding-top: 6px; margin-top: 8px; line-height: 1.5; font-size: 10px; }
+  .foot { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #999; font-size: 7px; color: #333; line-height: 1.3; }
+  .coupon-code { font-family: 'Courier New', monospace; font-size: 5.5px; line-height: 1.15; white-space: pre-wrap; word-break: break-all; margin: 4px 0 0; padding: 0; border: none; background: transparent; color: #222; }
+  .legend { font-size: 7px; color: #666; margin-top: 4px; }
+  @page { size: 80mm auto; margin: 4mm; }
+  @media print { html, body { width: 80mm; padding: 0; } .slip { border: none; } }
+</style></head><body>
+<div class="slip">
+  <div class="head">
+    <h1>⚽ FIFA WORLD CUP 2026</h1>
+    <h2>НАКОПИЧУВАЛЬНИЙ КУПОН ПРОГНОЗУ</h2>
+  </div>
+  <div class="meta">
+    <div><strong>Гравець:</strong> ${name}</div>
+    <div><strong>Тури:</strong> ${sealedList.map(rid => ROUNDS[rid].name).join(' → ')}</div>
+    <div><strong>Оновлено:</strong> ${dateStr}</div>
+    <div><strong>Новий тур:</strong> ${r.name}</div>
+  </div>
+  ${sections}
+  <div class="totals">
+    <div>${totalsLine}</div>
+    <div><strong>ВСЬОГО ОЧОК: ${total}</strong></div>
+  </div>
+  <div class="legend">3=точний · 2=різниця · 1=результат · 0=промах · —=ще не зіграно</div>
+  <div class="foot"><strong>КОД ДЛЯ ІМПОРТУ / ЛІДЕРІВ</strong> — завантаж цей PDF у додаток або кнопка «З коду внизу»:<pre class="coupon-code">${code}</pre></div>
+</div>
+</body></html>`;
+}
+
+function printCumulativeCoupon() {
+  if (!ROUND_ORDER.some(isRoundSealed)) { alert('Спочатку закрий хоча б один тур!'); return; }
+  const sealed = ROUND_ORDER.filter(isRoundSealed);
+  printRoundCoupon(sealed[sealed.length - 1]);
+}
+
+function isMobilePrint() {
+  return window.matchMedia('(max-width: 768px)').matches
+    || /iPhone|iPad|iPod|Android|Mobi|Mobile/i.test(navigator.userAgent);
+}
+
+function ensurePrintModal() {
+  let modal = document.getElementById('coupon-print-modal');
+  if (modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'coupon-print-modal';
+  modal.innerHTML = `<div class="print-modal-actions">
+    <button type="button" id="print-modal-do">🖨️ Друк / Зберегти PDF</button>
+    <button type="button" id="print-modal-close">✕</button>
+  </div>
+  <iframe id="print-modal-frame" title="Купон для друку"></iframe>`;
+  document.body.appendChild(modal);
+  document.getElementById('print-modal-close').onclick = () => modal.classList.remove('open');
+  return modal;
+}
+
+function printHtmlInFrame(frame, html, autoPrint) {
+  const win = frame.contentWindow;
+  const doc = win.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  const doPrint = () => {
+    win.focus();
+    win.print();
+  };
+  if (autoPrint) setTimeout(doPrint, 350);
+  return doPrint;
+}
+
+function openPrintDocument(html, autoPrint) {
+  if (isMobilePrint()) {
+    const modal = ensurePrintModal();
+    const frame = document.getElementById('print-modal-frame');
+    const doPrint = printHtmlInFrame(frame, html, false);
+    document.getElementById('print-modal-do').onclick = doPrint;
+    modal.classList.add('open');
+    return;
+  }
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;opacity:0;pointer-events:none';
+  document.body.appendChild(iframe);
+  printHtmlInFrame(iframe, html, !!autoPrint);
+  setTimeout(() => iframe.remove(), 2000);
+}
+
+function printRoundCoupon(roundId) {
+  if (!isRoundSealed(roundId)) return;
+  openPrintDocument(buildCouponDocument(roundId), true);
+}
+
+function renderCouponButtons() {
+  const el = document.getElementById('coupon-buttons');
+  if (!el) return;
+  const sealed = ROUND_ORDER.filter(isRoundSealed);
+  const open = getCurrentOpenRound();
+  let html = '';
+  if (sealed.length) {
+    html += `<span style="font-size:.8rem;color:var(--muted)">Закрито: ${sealed.map(r => ROUNDS[r].name).join(' → ')}</span>`;
+    html += `<button onclick="printCumulativeCoupon()">📄 PDF (${sealed.length} тур.)</button>`;
+  }
+  if (open) {
+    html += `<span style="font-size:.8rem;color:var(--accent)"> · Наступний: <strong>${ROUNDS[open].name}</strong></span>`;
+  }
+  el.innerHTML = html || '<span style="font-size:.8rem;color:var(--muted)">Закрий перший тур — отримаєш PDF-купон</span>';
+}
+
+function renderImportStatus() {
+  const el = document.getElementById('import-status');
+  if (!el) return;
+  const sealed = ROUND_ORDER.filter(isRoundSealed);
+  const open = getCurrentOpenRound();
+  if (!sealed.length) {
+    el.textContent = '';
+    return;
+  }
+  const pts = calcTotalPoints();
+  el.textContent = `✓ Завантажено ${sealed.length} тур(и) · ${pts.total} очок` + (open ? ` · заповни «${ROUNDS[open].name}»` : ' · усі тури закриті');
+  el.style.color = 'var(--accent)';
+}
+
+function ptsBadgeForMatch(m) {
+  const rid = 'G' + m.md;
+  if (!isRoundSealed(rid)) return '';
+  const pred = sealedRounds[rid].scores?.[m.id];
+  const act = getActual(m);
+  if (!pred || !act) return '';
+  const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
+  return `<span class="pts-badge pts-${pts}">+${pts}</span>`;
+}
+
+function ptsBadgeKo(id) {
+  const rid = getKoRoundId(id);
+  if (!rid || !isRoundSealed(rid)) return '';
+  const pred = sealedRounds[rid].scores?.[id];
+  const act = KO_ACTUAL[id];
+  if (!pred || !act) return '';
+  const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
+  return ` <span class="pts-badge pts-${pts}">+${pts}</span>`;
+}
+
+function renderGroups() {
+  const md = ROUNDS[activeGroupRound].md;
+  const container = document.getElementById('groups-container');
+  container.innerHTML = '';
+  'ABCDEFGHIJKL'.split('').forEach(g => {
+    const groupMatches = MATCHES.filter(m => m.g === g && m.md === md);
+    if (!groupMatches.length) return;
+    const st = getStandings(g);
+    const stats = getGroupStats(g);
+    const card = document.createElement('div');
+    card.className = 'group-card';
+    card.innerHTML = `<div class="group-head" style="border-left:4px solid ${GROUP_COLORS[g]}"><span>Група <span class="letter">${g}</span></span><span class="round-label">${ROUNDS[activeGroupRound].name}</span></div>`;
+    const table = document.createElement('table');
+    table.className = 'standings';
+    table.innerHTML = '<tr><th>#</th><th>Команда</th><th>І</th><th>О</th><th>З</th><th>П</th><th>±</th></tr>';
+    st.forEach((tc, i) => {
+      const s = stats[tc];
+      const cls = i === 0 ? 'qualify-1' : i === 1 ? 'qualify-2' : i === 2 ? 'qualify-3' : 'eliminated';
+      table.innerHTML += `<tr class="${cls}"><td>${i+1}</td><td class="team-cell">${tShort(tc)}</td><td>${s.played}</td><td>${s.pts}</td><td>${s.gf}</td><td>${s.ga}</td><td>${s.gd>0?'+':''}${s.gd}</td></tr>`;
+    });
+    card.appendChild(table);
+    const list = document.createElement('div');
+    list.className = 'matches-list';
+    groupMatches.forEach(m => {
+      const disp = getDisplayScore(m);
+      const pred = getSealedPred(m.id);
+      const act = getActual(m);
+      const showCompare = pred && act;
+      const locked = disp.actual || disp.locked || !canEditGroupMatch(m);
+      const row = document.createElement('div');
+      row.className = 'match-row' + (m.done ? ' done' : '') + (disp.locked ? ' locked-pred' : '');
+      const scoreCell = showCompare
+        ? scoreCompareHtml(m.id, m)
+        : `<div class="score-inputs">
+          <input type="number" min="0" max="20" value="${disp.h}" ${locked?'disabled':''} data-mid="${m.id}" data-side="h">
+          <span class="sep">:</span>
+          <input type="number" min="0" max="20" value="${disp.a}" ${locked?'disabled':''} data-mid="${m.id}" data-side="a">
+          ${ptsBadgeForMatch(m)}
+        </div>`;
+      row.innerHTML = `
+        ${tCell(m.h, false)}
+        ${scoreCell}
+        ${tCell(m.a, true)}
+        <div class="match-date">${m.d}${act ? ' · результат' : pred ? ' · прогноз 🔒' : ' · прогноз'}</div>`;
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    container.appendChild(card);
+  });
+  container.querySelectorAll('input[data-mid]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const id = +e.target.dataset.mid;
+      const m = MATCHES.find(x => x.id === id);
+      if (!canEditGroupMatch(m)) return;
+      const side = e.target.dataset.side;
+      setScore(id, side, e.target.value);
+      saveData(true);
+      onScoreInput();
+    });
+  });
+}
+
+let _scoreRaf = 0;
+function onScoreInput() {
+  const ui = captureUiState();
+  if (_scoreRaf) cancelAnimationFrame(_scoreRaf);
+  _scoreRaf = requestAnimationFrame(() => {
+    updateProgress();
+    renderScoreboard();
+    renderSealBars();
+    renderGroups();
+    renderKnockout();
+    restoreUiState(ui);
+  });
+}
+
+function renderKnockout() {
+  const r32teams = buildR32Teams();
+  const { adv } = getThirdMapping();
+  const info = document.getElementById('third-info');
+  const groupsReady = ['G1','G2','G3'].every(isRoundSealed);
+  if (groupsReady && allGroupDone()) {
+    info.innerHTML = `<strong>8 найкращих третіх місць:</strong><div style="display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin-top:.5rem">${adv.map(x => `<span class="team-inline">${flagHtml(x.team)}<span>${x.g}: ${teamLabel(x.team)}</span></span>`).join('')}</div>`;
+  } else if (groupsReady) {
+    info.innerHTML = 'Груповий етап закрито. Таблиці оновлюються за твоїми прогнозами.';
+  } else {
+    const sealed = ['G1','G2','G3'].filter(isRoundSealed).length;
+    info.innerHTML = `Спочатку закрий усі 3 тури групи (${sealed}/3). Потім відкриється плей-оф.`;
+  }
+
+  const container = document.getElementById('knockout-container');
+  container.innerHTML = '';
+  const kr = ROUNDS[activeKoRound];
+
+  if (kr.from === 73) {
+    const sec = document.createElement('div');
+    sec.className = 'knockout-section';
+    sec.innerHTML = `<h2>${kr.name}</h2>`;
+    const grid = document.createElement('div');
+    grid.className = 'ko-grid';
+    R32.forEach(m => grid.appendChild(makeKoMatch(m.id, m.l, r32teams[m.id]?.h, r32teams[m.id]?.a)));
+    sec.appendChild(grid);
+    container.appendChild(sec);
+  } else {
+    const roundDef = KO_TREE.find(rt => rt.matches.some(m => m.id >= kr.from && m.id <= kr.to))
+      || { round: kr.name, matches: [] };
+    const sec = document.createElement('div');
+    sec.className = 'knockout-section';
+    sec.innerHTML = `<h2>${kr.name}</h2>`;
+    const grid = document.createElement('div');
+    grid.className = 'ko-grid';
+    for (let id = kr.from; id <= kr.to; id++) {
+      let label = 'M' + id, home = null, away = null;
+      if (id >= 73 && id <= 88) {
+        const m = R32.find(x => x.id === id);
+        label = m.l;
+        home = r32teams[id]?.h; away = r32teams[id]?.a;
+      } else {
+        for (const rt of KO_TREE) {
+          const m = rt.matches.find(x => x.id === id);
+          if (m) { label = m.l; home = getKoTeam(m.h, r32teams); away = getKoTeam(m.a, r32teams); break; }
+        }
+      }
+      grid.appendChild(makeKoMatch(id, label, home, away));
+    }
+    sec.appendChild(grid);
+    container.appendChild(sec);
+  }
+
+  const champ = getKoWinnerFromScore(104, getKoTeamsForMatch(104, r32teams).h, getKoTeamsForMatch(104, r32teams).a);
+  const champEl = document.getElementById('champion-name');
+  if (champ) champEl.innerHTML = `${flagHtml(champ, 'lg')}<span>${teamLabel(champ)}</span>`;
+  else champEl.textContent = '—';
+}
+
+function makeKoMatch(id, label, home, away) {
+  const div = document.createElement('div');
+  div.className = 'ko-match';
+  const disp = getScore(id);
+  const locked = disp.actual || disp.locked || !canEditKoMatch(id);
+  const editable = canEditKoMatch(id) && home && away;
+  const pred = getSealedPred(id);
+  const act = KO_ACTUAL[id] || null;
+  const showCompare = pred && act;
+
+  const mid = document.createElement('div');
+  mid.className = 'mid';
+  mid.innerHTML = `${label}${locked ? ' 🔒' : ''}${!showCompare ? ptsBadgeKo(id) : ''}`;
+  div.appendChild(mid);
+
+  if (!home || !away) {
+    const tbd = document.createElement('div');
+    tbd.className = 'team-cell tbd';
+    tbd.style.cssText = 'font-style:italic;color:var(--muted)';
+    tbd.textContent = 'Очікується...';
+    div.appendChild(tbd);
+    return div;
+  }
+
+  const homeEl = document.createElement('div');
+  homeEl.className = 'team-cell';
+  homeEl.style.marginBottom = '.35rem';
+  homeEl.innerHTML = tShort(home);
+  div.appendChild(homeEl);
+
+  if (showCompare) {
+    const cmp = document.createElement('div');
+    cmp.style.cssText = 'text-align:center;margin:.3rem 0';
+    cmp.innerHTML = scoreCompareHtml(id);
+    div.appendChild(cmp);
+  } else {
+    const row = document.createElement('div');
+    row.className = 'score-inputs';
+    row.style.cssText = 'justify-content:center;margin:.3rem 0';
+    row.innerHTML = `
+      <input type="number" min="0" max="20" value="${disp.h}" ${locked?'disabled':''} data-koid="${id}" data-side="h">
+      <span class="sep">:</span>
+      <input type="number" min="0" max="20" value="${disp.a}" ${locked?'disabled':''} data-koid="${id}" data-side="a">`;
+    div.appendChild(row);
+    row.querySelectorAll('input').forEach(inp => {
+      inp.addEventListener('input', e => {
+        if (!canEditKoMatch(id)) return;
+        setScore(id, e.target.dataset.side, e.target.value);
+        clearDownstream(id);
+        saveData(true);
+        onScoreInput();
+      });
+    });
+  }
+
+  const awayEl = document.createElement('div');
+  awayEl.className = 'team-cell away';
+  awayEl.style.textAlign = 'right';
+  awayEl.innerHTML = tShort(away);
+  div.appendChild(awayEl);
+
+  const sc = getScore(id);
+  if (editable && sc.h !== '' && sc.a !== '' && +sc.h === +sc.a) {
+    const pen = document.createElement('div');
+    pen.style.cssText = 'font-size:.72rem;text-align:center;margin-top:.3rem;color:var(--muted)';
+    pen.appendChild(document.createTextNode('Проходить (нічия): '));
+    [home, away].forEach(tc => {
+      const b = document.createElement('button');
+      b.innerHTML = flagHtml(tc, 'sm');
+      b.title = teamLabel(tc);
+      b.style.cssText = 'margin:0 .2rem;padding:.2rem .4rem;font-size:.75rem;cursor:pointer;border-radius:6px';
+      if (sc.adv === tc) { b.style.borderColor = 'var(--accent)'; b.style.boxShadow = '0 0 8px var(--glow)'; }
+      b.onclick = () => { scores[id].adv = tc; clearDownstream(id); saveData(true); onScoreInput(); };
+      pen.appendChild(b);
+    });
+    div.appendChild(pen);
+  }
+
+  return div;
+}
+
+function clearDownstream(id) {
+  const deps = {
+    73:[89],74:[90],75:[89],76:[91],77:[90],78:[91],79:[92],80:[92],
+    81:[93],82:[93],83:[94],84:[94],85:[95],86:[95],87:[96],88:[96],
+    89:[97],90:[97],91:[99],92:[99],93:[98],94:[98],95:[100],96:[100],
+    97:[101],98:[101],99:[102],100:[102],101:[103,104],102:[103,104],103:[],104:[]
+  };
+  const toClear = new Set();
+  function walk(i) {
+    (deps[i]||[]).forEach(j => { toClear.add(j); walk(j); });
+  }
+  walk(id);
+  toClear.forEach(i => { delete scores[i]; scores[i] = { h:'', a:'' }; });
+}
+
+function updateProgress() {
+  let filled = MATCHES.filter(m => m.done).length;
+  ROUND_ORDER.forEach(rid => {
+    if (!isRoundSealed(rid)) return;
+    const r = ROUNDS[rid];
+    if (r.type === 'group') {
+      filled += MATCHES.filter(m => m.md === r.md && !m.done).length;
+    } else {
+      filled += (r.to - r.from + 1);
+    }
+  });
+  const open = getCurrentOpenRound();
+  if (open) {
+    const r = ROUNDS[open];
+    if (r.type === 'group') {
+      filled += MATCHES.filter(m => m.md === r.md && !m.done).filter(m => {
+        const s = scores[m.id]; return s && s.h !== '' && s.a !== '';
+      }).length;
+    } else {
+      for (let id = r.from; id <= r.to; id++) {
+        const s = scores[id];
+        if (s && s.h !== '' && s.a !== '' && (+s.h !== +s.a || s.adv)) filled++;
+      }
+    }
+  }
+  const pct = Math.round(filled / 104 * 100);
+  document.getElementById('progress-text').textContent = `Прогрес: ${filled} / 104 · ${open ? 'активний: ' + ROUNDS[open].name : 'усі тури закриті'}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function renderScoreboard() {
+  const { total, byRound } = calcTotalPoints();
+  document.getElementById('total-points').textContent = total;
+  const parts = ROUND_ORDER.filter(r => isRoundSealed(r)).map(rid => {
+    const live = calcRoundPoints(rid).points;
+    const atSeal = sealedRounds[rid].pointsAtSeal ?? live;
+    return `${ROUNDS[rid].name}: ${live} оч.${live !== atSeal ? ` (було ${atSeal} при закритті)` : ''}`;
+  });
+  document.getElementById('points-breakdown').innerHTML = parts.length
+    ? parts.join(' · ') + ` · <strong>всього: ${total}</strong>`
+    : 'Закрий тур — отримаєш PDF-купон і почнеш рахувати очки';
+}
+
+function sealRound(roundId) {
+  const missing = countMissingInRound(roundId);
+  if (missing) { alert(`Заповни ще ${missing} матч(ів) у цьому турі!`); return; }
+  if (isRoundSealed(roundId)) return;
+  if (!ensurePlayerNameBeforeSeal()) return;
+  if (roundId.startsWith('KO') && !['G1','G2','G3'].every(isRoundSealed)) {
+    alert('Спочатку закрий усі 3 тури групового етапу!'); return;
+  }
+
+  const snap = { scores: {}, sealedAt: new Date().toISOString() };
+  const r = ROUNDS[roundId];
+  if (r.type === 'group') {
+    MATCHES.filter(m => m.md === r.md && !m.done).forEach(m => {
+      snap.scores[m.id] = { ...scores[m.id] };
+    });
+  } else {
+    for (let id = r.from; id <= r.to; id++) {
+      if (scores[id] && scores[id].h !== '') {
+        snap.scores[id] = { ...scores[id] };
+      }
+    }
+  }
+
+  const prevTotal = calcTotalPoints().total;
+  sealedRounds[roundId] = snap;
+  const roundPts = calcRoundPoints(roundId).points;
+  sealedRounds[roundId].pointsAtSeal = roundPts;
+  sealedRounds[roundId].totalAtSeal = prevTotal + roundPts;
+
+  if (r.type === 'group') {
+    MATCHES.filter(m => m.md === r.md && !m.done).forEach(m => { scores[m.id] = { h: '', a: '' }; });
+  } else {
+    for (let id = r.from; id <= r.to; id++) scores[id] = { h: '', a: '' };
+  }
+
+  const ticket = buildCumulativeTicketString();
+  lastTicket = ticket;
+  document.getElementById('ticketOutput').value = ticket;
+  saveData(true);
+  renderAll();
+
+  const next = getCurrentOpenRound();
+  alert(`Тур «${r.name}» закрито!\nОчок за цей тур: ${roundPts}\nВсього очок: ${prevTotal + roundPts}\n\nЗбережи накопичувальний PDF-купон — він містить усі попередні тури + цей.${next ? '\n\nПеред «' + ROUNDS[next].name + '» завантаж цей PDF знову.' : ''}`);
+  printRoundCoupon(roundId);
+  if (next?.startsWith('G')) activeGroupRound = next;
+  if (next?.startsWith('KO')) { activeKoRound = next; document.querySelector('[data-tab=knockout]').click(); }
+}
+
+function buildTicket() {
+  const { total } = calcTotalPoints();
+  const payload = {
+    v: 2,
+    name: document.getElementById('playerName').value || 'Гравець',
+    sealedRounds,
+    scores,
+    roundPoints: {},
+    totalPoints: total,
+    createdAt: new Date().toISOString()
+  };
+  ROUND_ORDER.forEach(rid => {
+    if (isRoundSealed(rid)) payload.roundPoints[rid] = calcRoundPoints(rid).points;
+  });
+  return 'FIFA26|' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+
+function importFromOutput() {
+  const raw = document.getElementById('ticketOutput').value;
+  if (!raw?.trim()) { alert('Спочатку закрий тур — з\'явиться код купона внизу.'); return; }
+  const coupons = extractAllCoupons(raw);
+  document.getElementById('ticketInput').value = coupons[0] || raw.trim();
+  importTicket();
+}
+
+function importTicket() {
+  const raw = document.getElementById('ticketInput').value;
+  if (!raw?.trim()) { alert('Завантаж PDF або встав код з купона!'); return; }
+  const status = document.getElementById('import-status');
+  try {
+    const parsed = parseCouponRaw(raw);
+    document.getElementById('ticketInput').value = parsed.code;
+    const merged = mergeCouponSealed(parsed);
+    const hadLater = ROUND_ORDER.some(r => sealedRounds[r] && !merged[r]);
+    if (hadLater && !confirm('У тебе вже є прогрес пізніших турів. Замінити даними з купона?')) return;
+
+    sealedRounds = merged;
+    scores = {};
+    if (parsed.data.scores && (parsed.type === 'full')) scores = parsed.data.scores;
+    if (parsed.data.koWinners) {
+      Object.entries(parsed.data.koWinners).forEach(([id, team]) => {
+        if (!scores[id] || scores[id].h === '') scores[id] = { h: '1', a: '0', adv: team };
+      });
+    }
+    const name = parsed.data.name || parsed.data.playerName;
+    if (name) document.getElementById('playerName').value = name;
+
+    initScores();
+    const open = getCurrentOpenRound();
+    if (open?.startsWith('G')) activeGroupRound = open;
+    if (open?.startsWith('KO')) activeKoRound = open;
+
+    lastTicket = buildCumulativeTicketString();
+    document.getElementById('ticketOutput').value = lastTicket;
+    saveData(true);
+    renderAll();
+
+    const { total, byRound } = calcTotalPoints();
+    const sealed = ROUND_ORDER.filter(r => isRoundSealed(r));
+    const lines = sealed.map(r => `${ROUNDS[r].name}: ${byRound[r] || 0}`);
+    status.textContent = `✓ Купон завантажено · ${sealed.length} тур(и) · ${total} очок`;
+    status.style.color = 'var(--accent)';
+    alert(`Купон завантажено!\n${lines.join('\n')}\n\nВсього: ${total} очок` +
+      (open ? `\n\n→ Заповни прогнози: «${ROUNDS[open].name}»` : '\n\n→ Усі тури закриті!'));
+    if (open?.startsWith('KO')) document.querySelector('[data-tab=knockout]').click();
+    else if (open?.startsWith('G')) document.querySelector('[data-tab=groups]').click();
+  } catch (e) {
+    status.textContent = '❌ ' + e.message;
+    status.style.color = '#ff8a8a';
+    alert('Не вдалося прочитати купон.\n' + e.message);
+  }
+}
+
+function getSnapFromCoupon(parsed) {
+  const incoming = parsed.data.sealedRounds || {};
+  const err = validateSealedSequence(incoming);
+  if (err) throw new Error(err);
+  return incoming;
+}
+
+function leaderboardEntryFromCoupon(raw) {
+  const parsed = parseCouponRaw(raw);
+  const snap = getSnapFromCoupon(parsed);
+  const { total, byRound } = calcTotalPointsFromSnap(snap);
+  const name = parsed.data.name || parsed.data.playerName || 'Гравець';
+  const rounds = ROUND_ORDER.filter(r => snap[r]).length;
+  return { name, total, byRound, snap, code: parsed.code, rounds };
+}
+
+function loadLeaderboardCodes() {
+  try {
+    const raw = localStorage.getItem('fifa2026leaderboard');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function saveLeaderboardCodes(codes) {
+  localStorage.setItem('fifa2026leaderboard', JSON.stringify(codes));
+}
+
+function refreshLeaderboard() {
+  const textarea = document.getElementById('leaderboardInput');
+  const existing = loadLeaderboardCodes();
+  const newCoupons = extractAllCoupons(textarea.value || '');
+  const allCodes = [...new Set([...existing, ...newCoupons])];
+  saveLeaderboardCodes(allCodes);
+  textarea.value = allCodes.join('\n\n');
+  renderLeaderboardTable(allCodes);
+  if (newCoupons.length) {
+    const status = document.getElementById('leaderboard-status');
+    if (status) status.textContent = `Додано ${newCoupons.length} купон(ів) · всього ${allCodes.length}`;
+  }
+}
+
+function clearLeaderboard() {
+  if (!confirm('Очистити таблицю лідерів?')) return;
+  localStorage.removeItem('fifa2026leaderboard');
+  document.getElementById('leaderboardInput').value = '';
+  document.getElementById('leaderboard-table-wrap').innerHTML = '';
+}
+
+async function importLeaderboardPdfs(input) {
+  const files = [...(input.files || [])];
+  input.value = '';
+  const codes = loadLeaderboardCodes();
+  let added = 0;
+  for (const file of files) {
+    const found = await extractCouponsFromPdf(file);
+    for (const code of found) {
+      if (!codes.includes(code)) { codes.push(code); added++; }
+    }
+  }
+  saveLeaderboardCodes(codes);
+  document.getElementById('leaderboardInput').value = codes.join('\n\n');
+  renderLeaderboardTable(codes);
+  if (added) alert(`Додано ${added} купон(ів) до таблиці лідерів.`);
+  else alert('Не вдалося знайти нові коди в PDF.');
+}
+
+function renderLeaderboardTable(codes) {
+  const wrap = document.getElementById('leaderboard-table-wrap');
+  if (!codes.length) {
+    wrap.innerHTML = '<p style="color:var(--muted);font-size:.85rem">Додай купони друзів — з\'явиться таблиця.</p>';
+    return;
+  }
+  const entries = [];
+  const errors = [];
+  codes.forEach(code => {
+    try { entries.push(leaderboardEntryFromCoupon(code)); }
+    catch (e) { errors.push(code.slice(0, 24) + '…'); }
+  });
+  entries.sort((a, b) => b.total - a.total || b.rounds - a.rounds);
+  const cols = ROUND_ORDER.filter(rid => entries.some(e => e.byRound[rid] != null));
+  let html = '<table class="leaderboard-table"><tr><th>#</th><th>Гравець</th>';
+  cols.forEach(rid => { html += `<th>${ROUNDS[rid].name.replace(' ', '<br>')}</th>`; });
+  html += '<th>Тури</th><th class="total-col">Всього</th></tr>';
+  entries.forEach((e, i) => {
+    html += `<tr class="${i === 0 ? 'leader' : ''}"><td>${i + 1}</td><td class="name">${e.name}</td>`;
+    cols.forEach(rid => { html += `<td>${e.byRound[rid] != null ? e.byRound[rid] : '—'}</td>`; });
+    html += `<td>${e.rounds}/8</td><td class="total-col">${e.total}</td></tr>`;
+  });
+  html += '</table>';
+  if (errors.length) html += `<p style="font-size:.75rem;color:#ff8a8a;margin-top:.5rem">Не прочитано: ${errors.length} код(ів)</p>`;
+  wrap.innerHTML = html;
+}
+
+function copyTicket() {
+  const t = document.getElementById('ticketOutput').value || lastTicket;
+  if (!t) { alert('Спочатку закрий хоча б один тур!'); return; }
+  navigator.clipboard.writeText(t).then(() => alert('Код купона скопійовано!')).catch(() => {
+    document.getElementById('ticketOutput').select();
+    alert('Не вдалося скопіювати автоматично — виділи текст і Ctrl+C');
+  });
+}
+
+function renderSummary() {
+  const el = document.getElementById('summary-content');
+  const name = document.getElementById('playerName').value || 'Гравець';
+  const date = new Date().toLocaleDateString('uk-UA', { day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  let html = `<h3>📋 Прогноз: ${name}</h3><p style="color:var(--muted);margin-bottom:1rem">Дата: ${date}</p>`;
+
+  html += '<h3>🏁 Групи (топ-2)</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem">';
+  'ABCDEFGHIJKL'.split('').forEach(g => {
+    const st = getStandings(g);
+    html += `<div><strong>Гр. ${g}:</strong><br>1. <span class="team-inline">${tShort(st[0])}</span><br>2. <span class="team-inline">${tShort(st[1])}</span></div>`;
+  });
+  html += '</div>';
+
+  const { adv } = getThirdMapping();
+  html += `<h3 style="margin-top:1rem">🥉 Проходять 3-і місця</h3><div style="display:flex;flex-wrap:wrap;gap:.4rem 1rem">${adv.map(x => `<span class="team-inline">${flagHtml(x.team,'sm')} ${x.g}: ${teamLabel(x.team)}</span>`).join('')}</div>`;
+
+  const r32 = buildR32Teams();
+  const champ = getKoWinnerFromScore(104, getKoTeamsForMatch(104, r32).h, getKoTeamsForMatch(104, r32).a);
+  if (champ) html += `<h3 style="margin-top:1rem">🏆 Чемпіон</h3><p style="font-size:1.3rem;color:var(--gold);display:flex;align-items:center;gap:.5rem">${flagHtml(champ,'lg')} ${teamLabel(champ)}</p>`;
+  const ko5teams = getKoTeamsForMatch(103, r32);
+  const third = getKoWinnerFromScore(103, ko5teams.h, ko5teams.a);
+  if (third) html += `<p style="display:flex;align-items:center;gap:.4rem">🥉 3-є місце: ${flagHtml(third)} ${teamLabel(third)}</p>`;
+
+  const { total, byRound } = calcTotalPoints();
+  if (total > 0) {
+    html += `<h3 style="margin-top:1rem">⭐ Очки</h3><p>${ROUND_ORDER.filter(r=>isRoundSealed(r)).map(r=>`${ROUNDS[r].name}: ${byRound[r]||0}`).join(' · ')}</p><p><strong>Всього: ${total}</strong></p>`;
+    html += `<p style="font-size:.78rem;color:var(--muted)">3 = точний рахунок · 2 = вгадана різниця · 1 = вгаданий результат · 0 = промах</p>`;
+  }
+
+  el.innerHTML = html;
+}
+
+function renderAll() {
+  renderRoundTabs();
+  renderSealBars();
+  renderScoreboard();
+  renderCouponButtons();
+  renderImportStatus();
+  renderGroups();
+  renderKnockout();
+  renderSummary();
+  updateProgress();
+  updatePlayerNameField();
+}
+
+function saveData(silent) {
+  const data = { scores, sealedRounds, playerName: document.getElementById('playerName').value, activeGroupRound, activeKoRound, koActual: KO_ACTUAL };
+  localStorage.setItem('fifa2026predictor', JSON.stringify(data));
+  if (!silent) alert('Збережено!');
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem('fifa2026predictor');
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.sealedRounds) sealedRounds = data.sealedRounds;
+      if (data.scores) scores = data.scores;
+      if (data.koActual) Object.assign(KO_ACTUAL, data.koActual);
+      if (data.playerName) document.getElementById('playerName').value = data.playerName;
+      if (data.activeGroupRound) activeGroupRound = data.activeGroupRound;
+      if (data.activeKoRound) activeKoRound = data.activeKoRound;
+    }
+  } catch(e) {}
+}
+
+function resetAll() {
+  if (!confirm('Скинути ВСЕ (прогнози, квитки, очки)?')) return;
+  sealedRounds = {}; scores = {};
+  activeGroupRound = 'G1'; activeKoRound = 'KO1'; lastTicket = '';
+  localStorage.removeItem('fifa2026predictor');
+  initScores();
+  document.getElementById('ticketInput').value = '';
+  document.getElementById('ticketOutput').value = '';
+  renderAll();
+}
+
+function exportPDF() {
+  if (!ROUND_ORDER.some(isRoundSealed)) {
+    alert('Спочатку закрий тур кнопкою «🔒 Закрити тур» — тоді зʼявиться букмекерський купон для друку.\n\nНа телефоні натисни «Друк / Зберегти PDF» у вікні купона.');
+    return;
+  }
+  printCumulativeCoupon();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+document.getElementById('playerName').addEventListener('input', () => saveData(true));
+
+document.addEventListener('error', e => {
+  const img = e.target;
+  if (!img?.classList?.contains('flag') || img.dataset.fallback) return;
+  img.dataset.fallback = '1';
+  const span = document.createElement('span');
+  span.className = 'flag-fallback flag-' + (img.dataset.size || 'md');
+  span.textContent = (img.dataset.iso || '').split('-').pop().slice(0, 3).toUpperCase();
+  span.title = img.alt || '';
+  img.replaceWith(span);
+}, true);
+
+initScores();
+loadData();
+const _open = getCurrentOpenRound();
+if (_open?.startsWith('G')) activeGroupRound = _open;
+if (_open?.startsWith('KO')) activeKoRound = _open;
+renderAll();
+renderLeaderboardTable(loadLeaderboardCodes());
+fetchResults(false);
+</script>
+</body>
+</html>
