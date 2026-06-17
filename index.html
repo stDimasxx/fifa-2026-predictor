@@ -307,6 +307,11 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .match-row:hover { background: rgba(255,255,255,.02); }
 .match-row.done { background: var(--done); }
 .match-row.locked-pred { opacity: .75; }
+.match-row.match-clickable, .ko-match.match-clickable { cursor: pointer; }
+.match-row.match-clickable:hover, .ko-match.match-clickable:hover {
+  background: rgba(0,240,181,.06); outline: 1px solid rgba(0,240,181,.25);
+}
+.match-row.match-clickable .match-date::after { content: ' · натисни — хто що ставив'; color: var(--accent); }
 
 .score-inputs { display: flex; align-items: center; gap: .35rem; }
 
@@ -365,6 +370,7 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 }
 
 .ko-match:hover { transform: translateY(-2px); }
+.ko-match.match-clickable .ko-when::after { content: ' · 👁 ставки'; color: var(--accent); }
 .ko-match .mid { font-size: .72rem; color: var(--muted); text-align: center; margin-bottom: .45rem; text-transform: uppercase; letter-spacing: .05em; }
 
 .champion-box {
@@ -411,6 +417,45 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .leaderboard-table td.name { text-align: left; font-weight: 600; }
 .leaderboard-table tr.leader td { background: rgba(255,210,74,.08); }
 .leaderboard-table .total-col { color: var(--gold); font-weight: 700; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; }
+.leaderboard-table .name-btn {
+  background: none; border: none; color: var(--text); font: inherit; font-weight: 600;
+  cursor: pointer; text-align: left; padding: 0; text-decoration: underline dotted var(--muted);
+}
+.leaderboard-table .name-btn:hover { color: var(--accent); }
+.leaderboard-table .detail-col { width: 2.5rem; }
+
+.tvp-link {
+  font-size: .85rem; color: var(--accent); text-decoration: none;
+  padding: .45rem .75rem; border: 1px solid var(--border); border-radius: 10px;
+  white-space: nowrap; transition: .15s;
+}
+.tvp-link:hover { border-color: var(--accent); background: var(--card-hover); }
+
+#lb-detail-modal {
+  display: none; position: fixed; inset: 0; z-index: 100001;
+  background: rgba(0,0,0,.88); padding: .75rem; overflow: auto;
+}
+#lb-detail-modal.open { display: block; }
+.lb-detail-box {
+  max-width: 720px; margin: 0 auto; background: var(--card);
+  border: 1px solid var(--border); border-radius: 14px; padding: 1rem 1.1rem 1.25rem;
+}
+.lb-detail-head { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+.lb-detail-head h3 { margin: 0; font-size: 1.2rem; }
+.lb-detail-close {
+  background: rgba(255,255,255,.08); border: 1px solid var(--border); color: var(--text);
+  border-radius: 8px; padding: .35rem .65rem; cursor: pointer;
+}
+.lb-detail-round { margin-top: 1rem; }
+.lb-detail-round h4 { font-size: .9rem; color: var(--gold); margin-bottom: .45rem; }
+.lb-detail-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.lb-detail-table th, .lb-detail-table td { border: 1px solid var(--border); padding: .35rem .45rem; }
+.lb-detail-table th { background: rgba(0,0,0,.25); font-size: .72rem; }
+.lb-detail-table .when { color: var(--muted); font-size: .68rem; white-space: nowrap; }
+.lb-detail-table .pts-3 { color: #5dffb0; }
+.lb-detail-table .pts-2 { color: #d4f070; }
+.lb-detail-table .pts-1 { color: var(--gold); }
+.lb-detail-table .pts-0 { color: #ff8080; }
 
 .import-status { font-size: .85rem; color: var(--accent); margin-top: .4rem; min-height: 1.2em; }
 
@@ -519,12 +564,15 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 
   <div class="ticket-panel sync-bar">
     <span id="sync-status" style="font-size:.85rem;color:var(--muted)">Результати: завантаження...</span>
-    <button class="primary" onclick="fetchResults(true)">🔄 Оновити результати</button>
+    <div class="row" style="gap:.5rem">
+      <button class="primary" onclick="fetchResults(true)">🔄 Оновити результати</button>
+      <a class="tvp-link" href="https://vod.tvp.pl/na-zywo" target="_blank" rel="noopener noreferrer">📺 TVP — футбол на żywo</a>
+    </div>
   </div>
 
   <div class="ticket-panel">
     <h3>🎫 Купон — продовжити гру</h3>
-    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Перед новим туром <strong>завантаж PDF</strong> або натисни <strong>«З коду внизу ↑»</strong> (найнадійніше). PDF-парсер потребує інтернет.</p>
+    <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Прогноз закривається <strong>за 10 хв</strong> до старту (Варшава). На закритому матчі — <strong>клік</strong>, щоб побачити ставки (купони друзів — у «Лідери»). Перед новим туром — <strong>PDF-купон</strong> або «З коду внизу ↑».</p>
     <div id="import-status" class="import-status"></div>
     <div class="row" style="margin-bottom:.5rem">
       <label class="coupon-upload-label">
@@ -573,7 +621,7 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
   <div id="panel-leaderboard" class="panel">
     <div class="ticket-panel" style="margin-bottom:1rem">
       <h3>🏆 Таблиця лідерів</h3>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Завантаж <strong>PDF</strong> або встав текст з купона цілком (навіть якщо код переноситься на кілька рядків — це нормально). Кілька купонів — через PDF або один за одним.</p>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Завантаж <strong>PDF</strong> або встав текст з купона. <strong>Натисни імʼя гравця</strong> — побачиш усі його прогнози по турах.</p>
       <label class="coupon-upload-label" style="margin-bottom:.5rem">
         📎 PDF купони друзів
         <input type="file" id="leaderboardPdfInput" accept=".pdf,application/pdf" multiple onchange="importLeaderboardPdfs(this)">
@@ -1244,6 +1292,170 @@ const MATCH_MD = {
 };
 MATCHES.forEach(m => { m.md = MATCH_MD[m.id]; });
 
+/** Час початку матчів — Europe/Warsaw (з розкладу FIFA / ESPN) */
+const KICKOFF_WAW={"1":"21:00","2":"04:00","3":"21:00","4":"03:00","5":"21:00","6":"00:00","7":"03:00","8":"06:00","9":"19:00","10":"22:00","11":"01:00","12":"04:00","13":"18:00","14":"21:00","15":"00:00","16":"03:00","17":"21:00","18":"00:00","19":"03:00","20":"06:00","21":"19:00","22":"22:00","23":"01:00","24":"04:00","25":"18:00","26":"21:00","27":"00:00","28":"03:00","29":"21:00","30":"00:00","31":"02:30","32":"05:00","33":"19:00","34":"22:00","35":"02:00","36":"06:00","37":"18:00","38":"21:00","39":"00:00","40":"03:00","41":"19:00","42":"23:00","43":"02:00","44":"05:00","45":"19:00","46":"22:00","47":"01:00","48":"04:00","49":"21:00","50":"21:00","51":"00:00","52":"00:00","53":"03:00","54":"03:00","55":"22:00","56":"22:00","57":"01:00","58":"01:00","59":"04:00","60":"04:00","61":"21:00","62":"21:00","63":"02:00","64":"02:00","65":"05:00","66":"05:00","67":"23:00","68":"23:00","69":"01:30","70":"01:30","71":"04:00","72":"04:00","73":"21:00","74":"19:00","75":"22:30","76":"03:00","77":"19:00","78":"23:00","79":"03:00","80":"18:00","81":"22:00","82":"02:00","83":"21:00","84":"01:00","85":"05:00","86":"20:00","87":"00:00","88":"03:30","89":"19:00","90":"23:00","91":"22:00","92":"02:00","93":"21:00","94":"02:00","95":"18:00","96":"22:00","97":"22:00","98":"21:00","99":"23:00","100":"03:00","101":"21:00","102":"21:00","103":"23:00","104":"21:00"};
+const KICKOFF_DAY={"1":"11 червня","2":"12 червня","3":"12 червня","4":"13 червня","5":"13 червня","6":"14 червня","7":"14 червня","8":"14 червня","9":"14 червня","10":"14 червня","11":"15 червня","12":"15 червня","13":"15 червня","14":"15 червня","15":"16 червня","16":"16 червня","17":"16 червня","18":"17 червня","19":"17 червня","20":"17 червня","21":"17 червня","22":"17 червня","23":"18 червня","24":"18 червня","25":"18 червня","26":"18 червня","27":"19 червня","28":"19 червня","29":"19 червня","30":"20 червня","31":"20 червня","32":"20 червня","33":"20 червня","34":"20 червня","35":"21 червня","36":"21 червня","37":"21 червня","38":"21 червня","39":"22 червня","40":"22 червня","41":"22 червня","42":"22 червня","43":"23 червня","44":"23 червня","45":"23 червня","46":"23 червня","47":"24 червня","48":"24 червня","49":"24 червня","50":"24 червня","51":"25 червня","52":"25 червня","53":"25 червня","54":"25 червня","55":"25 червня","56":"25 червня","57":"26 червня","58":"26 червня","59":"26 червня","60":"26 червня","61":"26 червня","62":"26 червня","63":"27 червня","64":"27 червня","65":"27 червня","66":"27 червня","67":"27 червня","68":"27 червня","69":"28 червня","70":"28 червня","71":"28 червня","72":"28 червня","73":"28 червня","74":"29 червня","75":"29 червня","76":"30 червня","77":"30 червня","78":"30 червня","79":"1 липня","80":"1 липня","81":"1 липня","82":"2 липня","83":"2 липня","84":"3 липня","85":"3 липня","86":"3 липня","87":"4 липня","88":"4 липня","89":"4 липня","90":"4 липня","91":"5 липня","92":"6 липня","93":"6 липня","94":"7 липня","95":"7 липня","96":"7 липня","97":"9 липня","98":"10 липня","99":"11 липня","100":"12 липня","101":"14 липня","102":"15 липня","103":"18 липня","104":"19 липня"};
+
+function kickoffLabel(id, fallbackDate) {
+  const t = KICKOFF_WAW[id];
+  if (!t) return fallbackDate || '';
+  const d = KICKOFF_DAY[id] || fallbackDate || '';
+  return d ? `${d} · ${t} (Варшава)` : `${t} (Варшава)`;
+}
+
+const PRED_LOCK_MINUTES = 10;
+const UK_MONTHS = { січня:0, лютого:1, березня:2, квітня:3, травня:4, червня:5, липня:6, серпня:7, вересня:8, жовтня:9, листопада:10, грудня:11 };
+const _kickoffMsCache = {};
+
+function getMatchKickoffMs(id) {
+  if (_kickoffMsCache[id] != null) return _kickoffMsCache[id];
+  const day = KICKOFF_DAY[id], t = KICKOFF_WAW[id];
+  if (!day || !t) { _kickoffMsCache[id] = null; return null; }
+  const parts = day.trim().split(/\s+/);
+  const dom = +parts[0], month = UK_MONTHS[parts[1]];
+  if (!dom || month == null) { _kickoffMsCache[id] = null; return null; }
+  const [hh, mm] = t.split(':').map(Number);
+  // Червень–липень 2026: Польща CEST (UTC+2)
+  const ms = Date.UTC(2026, month, dom, hh - 2, mm, 0);
+  _kickoffMsCache[id] = ms;
+  return ms;
+}
+
+function isKickoffLockActive(id) {
+  const kickoff = getMatchKickoffMs(id);
+  if (kickoff == null) return false;
+  return Date.now() >= kickoff - PRED_LOCK_MINUTES * 60 * 1000;
+}
+
+function canEditMatch(id) {
+  if (id <= 72) {
+    const m = MATCHES.find(x => x.id === id);
+    return m ? canEditGroupMatch(m) : false;
+  }
+  return canEditKoMatch(id);
+}
+
+function isMatchPredictionClosed(id) {
+  if (id <= 72) {
+    const m = MATCHES.find(x => x.id === id);
+    if (!m) return false;
+    if (m.done) return true;
+    if (isKickoffLockActive(id)) return true;
+    if (isRoundSealed('G' + m.md)) return true;
+    return false;
+  }
+  if (KO_ACTUAL[id]) return true;
+  if (isKickoffLockActive(id)) return true;
+  const rid = getKoRoundId(id);
+  if (rid && isRoundSealed(rid)) return true;
+  return false;
+}
+
+function getMatchActual(id) {
+  if (id <= 72) {
+    const m = MATCHES.find(x => x.id === id);
+    return m ? getActual(m) : null;
+  }
+  return KO_ACTUAL[id] || null;
+}
+
+function getMatchTitle(id) {
+  if (id <= 72) {
+    const m = MATCHES.find(x => x.id === id);
+    return m ? `${teamLabel(m.h)} — ${teamLabel(m.a)}` : 'Матч ' + id;
+  }
+  const r32 = buildR32Teams();
+  const teams = getKoTeamsForMatch(id, r32);
+  if (teams.h && teams.a) return `${teamLabel(teams.h)} — ${teamLabel(teams.a)}`;
+  return 'Матч ' + id;
+}
+
+function getSelfPrediction(matchId) {
+  const rid = matchId <= 72 ? 'G' + MATCHES.find(m => m.id === matchId)?.md : getKoRoundId(matchId);
+  const sealed = rid && sealedRounds[rid]?.scores?.[matchId];
+  if (sealed && isPredFilled(sealed)) return sealed;
+  if (!canEditMatch(matchId)) {
+    const sc = scores[matchId];
+    if (isPredFilled(sc)) return sc;
+  }
+  return null;
+}
+
+function collectMatchPredictions(matchId) {
+  const rows = [];
+  const selfName = getPlayerName() || 'Я';
+  const selfPred = getSelfPrediction(matchId);
+  if (selfPred) rows.push({ name: selfName, pred: selfPred, self: true });
+
+  const seen = new Set([selfName]);
+  const addEntry = e => {
+    if (!e?.snap || seen.has(e.name)) return;
+    const rid = matchId <= 72 ? 'G' + MATCHES.find(m => m.id === matchId)?.md : getKoRoundId(matchId);
+    const p = rid && e.snap[rid]?.scores?.[matchId];
+    if (!isPredFilled(p)) return;
+    seen.add(e.name);
+    rows.push({ name: e.name, pred: p, self: false });
+  };
+
+  (window._lbEntries || []).forEach(addEntry);
+  if (seen.size <= 1) {
+    loadLeaderboardCodes().forEach(code => {
+      try { addEntry(leaderboardEntryFromCoupon(code)); } catch (e) { /* skip */ }
+    });
+  }
+  return rows;
+}
+
+function ensureMatchPredModal() {
+  let modal = document.getElementById('match-pred-modal');
+  if (modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'match-pred-modal';
+  modal.innerHTML = `<div class="lb-detail-box" style="max-width:480px">
+    <div class="lb-detail-head">
+      <h3 id="match-pred-title">Ставки на матч</h3>
+      <button type="button" class="lb-detail-close" onclick="closeMatchPredictions()">✕</button>
+    </div>
+    <p id="match-pred-when" style="font-size:.78rem;color:var(--muted);margin:-.25rem 0 .6rem"></p>
+    <div id="match-pred-body"></div>
+  </div>`;
+  modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:100002;background:rgba(0,0,0,.88);padding:.75rem;overflow:auto';
+  modal.classList.add('match-pred-modal');
+  modal.addEventListener('click', e => { if (e.target === modal) closeMatchPredictions(); });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function showMatchPredictions(matchId) {
+  if (!isMatchPredictionClosed(matchId)) return;
+  const modal = ensureMatchPredModal();
+  const act = getMatchActual(matchId);
+  document.getElementById('match-pred-title').textContent = getMatchTitle(matchId)
+    + (act ? ` · ${act.h}:${act.a}` : '');
+  document.getElementById('match-pred-when').textContent = kickoffLabel(matchId, '');
+  const rows = collectMatchPredictions(matchId);
+  const body = document.getElementById('match-pred-body');
+  if (!rows.length) {
+    body.innerHTML = '<p style="color:var(--muted);font-size:.85rem">Поки ніхто не зафіксував прогноз на цей матч.<br>Додай купони друзів у вкладці «Лідери».</p>';
+  } else {
+    body.innerHTML = `<table class="lb-detail-table"><tr><th>Гравець</th><th>Прогноз</th><th>Очки</th></tr>${
+      rows.map(r => {
+        const predStr = r.pred.h + ':' + r.pred.a + (r.pred.adv && +r.pred.h === +r.pred.a ? ' → ' + teamLabel(r.pred.adv) : '');
+        const pts = act ? scorePrediction(r.pred.h, r.pred.a, act.h, act.a) : null;
+        const ptsStr = pts != null ? `+${pts}` : '—';
+        const ptsCls = pts != null ? `pts-${pts}` : '';
+        return `<tr><td>${r.self ? '<strong>' + r.name + '</strong>' : r.name}</td><td>${predStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
+      }).join('')
+    }</table>`;
+  }
+  modal.style.display = 'block';
+}
+
+function closeMatchPredictions() {
+  const m = document.getElementById('match-pred-modal');
+  if (m) m.style.display = 'none';
+}
+
 const ROUNDS = {
   G1: { name: '1-й тур групи', type: 'group', md: 1 },
   G2: { name: '2-й тур групи', type: 'group', md: 2 },
@@ -1342,6 +1554,7 @@ function isPredictionLocked(roundId) { return isRoundSealed(roundId); }
 function canEditGroupMatch(m) {
   const rid = 'G' + m.md;
   if (m.done) return false;
+  if (isKickoffLockActive(m.id)) return false;
   if (isRoundSealed(rid)) return false;
   return rid === getCurrentOpenRound();
 }
@@ -1357,6 +1570,7 @@ function canEditKoMatch(id) {
   const rid = getKoRoundId(id);
   if (!rid || isRoundSealed(rid)) return false;
   if (KO_ACTUAL[id]) return false;
+  if (isKickoffLockActive(id)) return false;
   return rid === getCurrentOpenRound();
 }
 
@@ -1721,11 +1935,12 @@ function isPredFilled(sc) {
 function countMissingInRound(roundId) {
   const r = ROUNDS[roundId];
   if (r.type === 'group') {
-    return MATCHES.filter(m => m.md === r.md && !m.done).filter(m => !isPredFilled(scores[m.id])).length;
+    return MATCHES.filter(m => m.md === r.md && !m.done && canEditGroupMatch(m))
+      .filter(m => !isPredFilled(scores[m.id])).length;
   }
   let miss = 0;
   for (let id = r.from; id <= r.to; id++) {
-    if (KO_ACTUAL[id]) continue;
+    if (!canEditKoMatch(id)) continue;
     const sc = scores[id];
     if (!isPredFilled(sc)) miss++;
     else if (+sc.h === +sc.a && !sc.adv) miss++;
@@ -1772,7 +1987,7 @@ function getRoundMatchLines(roundId) {
       if (!pred || pred.h === '') return;
       const act = getActual(m);
       const pts = act ? scorePrediction(pred.h, pred.a, act.h, act.a) : null;
-      lines.push({ n: m.id, label: `${teamLabel(m.h)} — ${teamLabel(m.a)}`, pred, act, pts, adv: pred.adv });
+      lines.push({ n: m.id, label: `${teamLabel(m.h)} — ${teamLabel(m.a)}`, when: kickoffLabel(m.id, m.d), pred, act, pts, adv: pred.adv });
     });
   } else {
     const r32 = buildR32Teams();
@@ -1783,7 +1998,7 @@ function getRoundMatchLines(roundId) {
       const label = teams.h && teams.a ? `${teamLabel(teams.h)} — ${teamLabel(teams.a)}` : 'M' + id;
       const act = KO_ACTUAL[id] || null;
       const pts = act ? scorePrediction(pred.h, pred.a, act.h, act.a) : null;
-      lines.push({ n: id, label, pred, act, pts, adv: pred.adv });
+      lines.push({ n: id, label, when: kickoffLabel(id, ''), pred, act, pts, adv: pred.adv });
     }
   }
   return lines;
@@ -2117,7 +2332,7 @@ function buildRoundSectionHtml(roundId) {
     const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
     const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
     const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
-    return `<tr><td class="n">${i + 1}</td><td class="match">${ln.label}</td><td class="pred">${predStr}</td><td class="res">${resStr}</td><td class="pts">${ptsStr}</td></tr>`;
+    return `<tr><td class="n">${i + 1}</td><td class="match">${ln.label}<div class="when">${ln.when || ''}</div></td><td class="pred">${predStr}</td><td class="res">${resStr}</td><td class="pts">${ptsStr}</td></tr>`;
   }).join('');
   let extra = '';
   if (roundId === 'KO1') {
@@ -2164,6 +2379,7 @@ function buildCouponDocument(roundId) {
   .totals { border-top: 2px solid #333; padding-top: 6px; margin-top: 8px; line-height: 1.5; font-size: 10px; }
   .foot { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #999; font-size: 7px; color: #333; line-height: 1.3; }
   .coupon-code { font-family: 'Courier New', monospace; font-size: 5.5px; line-height: 1.15; white-space: pre-wrap; word-break: break-all; margin: 4px 0 0; padding: 0; border: none; background: transparent; color: #222; }
+  .when { font-size: 7px; color: #666; margin-top: 1px; }
   .legend { font-size: 7px; color: #666; margin-top: 4px; }
   @page { size: 80mm auto; margin: 4mm; }
   @media print { html, body { width: 80mm; padding: 0; } .slip { border: none; } }
@@ -2330,8 +2546,13 @@ function renderGroups() {
       const act = getActual(m);
       const showCompare = pred && act;
       const locked = disp.actual || disp.locked || !canEditGroupMatch(m);
+      const clickable = isMatchPredictionClosed(m.id);
       const row = document.createElement('div');
-      row.className = 'match-row' + (m.done ? ' done' : '') + (disp.locked ? ' locked-pred' : '');
+      row.className = 'match-row' + (m.done ? ' done' : '') + (disp.locked ? ' locked-pred' : '') + (clickable ? ' match-clickable' : '');
+      if (clickable) {
+        row.title = 'Хто що поставив на цей матч';
+        row.addEventListener('click', () => showMatchPredictions(m.id));
+      }
       const scoreCell = showCompare
         ? scoreCompareHtml(m.id, m)
         : `<div class="score-inputs">
@@ -2344,7 +2565,7 @@ function renderGroups() {
         ${tCell(m.h, false)}
         ${scoreCell}
         ${tCell(m.a, true)}
-        <div class="match-date">${m.d}${act ? ' · результат' : pred ? ' · прогноз 🔒' : ' · прогноз'}</div>`;
+        <div class="match-date">${kickoffLabel(m.id, m.d)}${isKickoffLockActive(m.id) && !m.done ? ' · ⏱ закрито (−10 хв)' : ''}${act ? ' · результат' : (pred || locked) ? ' · прогноз 🔒' : ' · прогноз'}</div>`;
       list.appendChild(row);
     });
     card.appendChild(list);
@@ -2438,7 +2659,15 @@ function renderKnockout() {
 
 function makeKoMatch(id, label, home, away) {
   const div = document.createElement('div');
-  div.className = 'ko-match';
+  const clickable = isMatchPredictionClosed(id);
+  div.className = 'ko-match' + (clickable ? ' match-clickable' : '');
+  if (clickable) {
+    div.title = 'Хто що поставив на цей матч';
+    div.addEventListener('click', e => {
+      if (e.target.closest('input, select, button')) return;
+      showMatchPredictions(id);
+    });
+  }
   const disp = getScore(id);
   const locked = disp.actual || disp.locked || !canEditKoMatch(id);
   const editable = canEditKoMatch(id) && home && away;
@@ -2450,6 +2679,14 @@ function makeKoMatch(id, label, home, away) {
   mid.className = 'mid';
   mid.innerHTML = `${label}${locked ? ' 🔒' : ''}${!showCompare ? ptsBadgeKo(id) : ''}`;
   div.appendChild(mid);
+  const whenLine = kickoffLabel(id, '');
+  if (whenLine) {
+    const w = document.createElement('div');
+    w.className = 'ko-when';
+    w.style.cssText = 'font-size:.65rem;color:var(--muted);text-align:center;margin:-.2rem 0 .35rem';
+    w.textContent = whenLine;
+    div.appendChild(w);
+  }
 
   if (!home || !away) {
     const tbd = document.createElement('div');
@@ -2765,6 +3002,7 @@ async function importLeaderboardPdfs(input) {
 function renderLeaderboardTable(codes) {
   const wrap = document.getElementById('leaderboard-table-wrap');
   if (!codes.length) {
+    window._lbEntries = [];
     wrap.innerHTML = '<p style="color:var(--muted);font-size:.85rem">Додай купони друзів — з\'явиться таблиця.</p>';
     return;
   }
@@ -2774,19 +3012,73 @@ function renderLeaderboardTable(codes) {
     try { entries.push(leaderboardEntryFromCoupon(code)); }
     catch (e) { errors.push(code.slice(0, 24) + '…'); }
   });
+  window._lbEntries = entries;
   entries.sort((a, b) => b.total - a.total || b.rounds - a.rounds);
   const cols = ROUND_ORDER.filter(rid => entries.some(e => e.byRound[rid] != null));
   let html = '<table class="leaderboard-table"><tr><th>#</th><th>Гравець</th>';
   cols.forEach(rid => { html += `<th>${ROUNDS[rid].name.replace(' ', '<br>')}</th>`; });
-  html += '<th>Тури</th><th class="total-col">Всього</th></tr>';
+  html += '<th>Тури</th><th class="total-col">Всього</th><th class="detail-col">👁</th></tr>';
   entries.forEach((e, i) => {
-    html += `<tr class="${i === 0 ? 'leader' : ''}"><td>${i + 1}</td><td class="name">${e.name}</td>`;
+    html += `<tr class="${i === 0 ? 'leader' : ''}"><td>${i + 1}</td><td class="name"><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})">${e.name}</button></td>`;
     cols.forEach(rid => { html += `<td>${e.byRound[rid] != null ? e.byRound[rid] : '—'}</td>`; });
-    html += `<td>${e.rounds}/8</td><td class="total-col">${e.total}</td></tr>`;
+    html += `<td>${e.rounds}/8</td><td class="total-col">${e.total}</td><td><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})" title="Деталі прогнозів">👁</button></td></tr>`;
   });
   html += '</table>';
   if (errors.length) html += `<p style="font-size:.75rem;color:#ff8a8a;margin-top:.5rem">Не прочитано: ${errors.length} код(ів)</p>`;
   wrap.innerHTML = html;
+}
+
+function ensureLeaderboardModal() {
+  let modal = document.getElementById('lb-detail-modal');
+  if (modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'lb-detail-modal';
+  modal.innerHTML = `<div class="lb-detail-box">
+    <div class="lb-detail-head">
+      <h3 id="lb-detail-title">Прогнози</h3>
+      <button type="button" class="lb-detail-close" onclick="closeLeaderboardDetails()">✕ Закрити</button>
+    </div>
+    <div id="lb-detail-body"></div>
+  </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) closeLeaderboardDetails(); });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function buildLeaderboardRoundHtml(snap, roundId) {
+  const lines = withSealedSnapshot(snap, () => getRoundMatchLines(roundId));
+  if (!lines.length) return '';
+  const roundPts = withSealedSnapshot(snap, () => calcRoundPoints(roundId).points);
+  const rows = lines.map(ln => {
+    const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
+    const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
+    const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
+    const ptsCls = ln.pts != null ? `pts-${ln.pts}` : '';
+    return `<tr><td class="when">${ln.when || '—'}</td><td>${ln.label}</td><td>${predStr}</td><td>${resStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
+  }).join('');
+  let extra = '';
+  if (roundId === 'KO1') {
+    const { adv } = withSealedSnapshot(snap, () => getThirdMapping());
+    extra = `<p style="font-size:.72rem;color:var(--muted);margin:.35rem 0">8×3-є місце: ${adv.map(x => `${x.g}: ${teamLabel(x.team)}`).join(' · ')}</p>`;
+  }
+  return `<div class="lb-detail-round"><h4>${ROUNDS[roundId].name} — ${roundPts} оч.</h4>${extra}
+    <table class="lb-detail-table"><tr><th>Час</th><th>Матч</th><th>Прогноз</th><th>Результат</th><th>Очки</th></tr>${rows}</table></div>`;
+}
+
+function showLeaderboardDetails(index) {
+  const entry = window._lbEntries?.[index];
+  if (!entry) return;
+  const modal = ensureLeaderboardModal();
+  document.getElementById('lb-detail-title').textContent = `${entry.name} — ${entry.total} очок`;
+  const sealedIds = ROUND_ORDER.filter(rid => entry.snap[rid]);
+  const body = document.getElementById('lb-detail-body');
+  body.innerHTML = sealedIds.map(rid => buildLeaderboardRoundHtml(entry.snap, rid)).join('')
+    || '<p style="color:var(--muted)">Немає зафіксованих прогнозів у купоні.</p>';
+  modal.classList.add('open');
+}
+
+function closeLeaderboardDetails() {
+  document.getElementById('lb-detail-modal')?.classList.remove('open');
 }
 
 function copyTicket() {
@@ -2913,6 +3205,13 @@ if (_open?.startsWith('KO')) activeKoRound = _open;
 renderAll();
 renderLeaderboardTable(loadLeaderboardCodes());
 fetchResults(false);
+
+setInterval(() => {
+  if (document.hidden) return;
+  renderGroups();
+  renderKnockout();
+  renderSealBars();
+}, 60000);
 </script>
 </body>
 </html>
