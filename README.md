@@ -2,7 +2,7 @@
 
 Прогноз матчів Чемпіонату світу FIFA 2026 — купони, очки, лідерборд.
 
-Відкрий сайт: `https://ТВІЙ-ЛОГІН.github.io/fifa-2026-predictor/`
+Відкрий сайт: `https://stDimasxx.github.io/fifa-2026-predictor/`
 
 ## Локально
 
