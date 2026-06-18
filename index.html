@@ -578,6 +578,35 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
   justify-content: space-between; padding: .85rem 1.25rem; margin-bottom: 1.25rem;
 }
 
+.cloud-login-dialog {
+  border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;
+  background: var(--card); color: var(--text); max-width: 360px; width: calc(100% - 2rem);
+}
+.cloud-login-dialog::backdrop { background: rgba(0,0,0,.55); }
+.cloud-login-dialog h3 { margin: 0 0 .5rem; font-size: 1.05rem; }
+.cloud-login-hint { font-size: .82rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.45; }
+.cloud-login-dialog label { display: block; font-size: .8rem; margin: .5rem 0 .25rem; color: var(--muted); }
+.cloud-login-dialog input {
+  width: 100%; box-sizing: border-box; padding: .55rem .65rem; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+}
+.cloud-login-error { color: #ff8a8a; font-size: .82rem; min-height: 1.2em; margin: .35rem 0 0; }
+.cloud-login-actions { display: flex; gap: .5rem; margin-top: 1rem; }
+.cloud-auth-tabs { display: flex; gap: .35rem; margin-bottom: .75rem; }
+.cloud-auth-tab {
+  flex: 1; padding: .45rem .5rem; border-radius: 8px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-weight: 600; font-size: .82rem; cursor: pointer;
+}
+.cloud-auth-tab.active { background: var(--accent); color: #111; border-color: var(--accent); }
+#cloud-auth-seal-note { font-size: .82rem; color: var(--gold); margin: 0 0 .75rem; display: none; }
+.seal-preview-wrap { max-height: 50vh; overflow: auto; margin: .75rem 0; border: 1px solid var(--border); border-radius: 8px; }
+.seal-preview-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.seal-preview-table th, .seal-preview-table td { padding: .35rem .5rem; border-bottom: 1px solid var(--border); text-align: left; }
+.seal-preview-table th { position: sticky; top: 0; background: var(--card); color: var(--muted); font-weight: 600; }
+.seal-confirm-dialog { border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; background: var(--card); color: var(--text); max-width: 520px; width: calc(100% - 2rem); }
+.seal-confirm-dialog::backdrop { background: rgba(0,0,0,.55); }
+#cloud-user-chip { font-size: .78rem; color: var(--accent); max-width: 11rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 #pdf-meta { display: none; }
 
 #coupon-print-modal {
@@ -658,9 +687,11 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
         <button type="button" class="lang-btn" data-lang="pl" onclick="setLang('pl')">PL</button>
       </div>
       <input type="text" id="playerName" placeholder="Твоє ім'я..." maxlength="40">
-      <button class="gold" id="btn-coupon" onclick="exportPDF()" data-i18n="btn_coupon" title="Букмекерський купон для друку / збереження PDF">📄 Купон</button>
-      <button onclick="saveData()">💾</button>
-      <button onclick="resetAll()">🔄</button>
+      <button type="button" class="primary" id="btn-cloud-login" onclick="openCloudLoginDialog()" style="display:none" data-i18n="btn_cloud_login">Увійти</button>
+      <button type="button" id="btn-cloud-register" onclick="openCloudRegisterDialog()" style="display:none" data-i18n="btn_cloud_register">Створити акаунт</button>
+      <span id="cloud-user-chip" style="display:none"></span>
+      <button type="button" id="btn-cloud-logout" onclick="syncLogout()" style="display:none;font-size:.8rem" data-i18n="btn_cloud_logout">Вийти</button>
+      <button class="gold" id="btn-coupon" onclick="exportPDF()" data-i18n="btn_coupon">📄 Видрукуй купон</button>
     </div>
   </div>
   <div class="tabs">
@@ -700,28 +731,12 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
     </div>
   </div>
 
-  <details class="ticket-panel collapse-panel">
-    <summary data-i18n="coupon_summary">🎫 Купон — завантажити / продовжити гру</summary>
-    <div class="collapse-body">
-    <p id="coupon-help" style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem" data-i18n-html="coupon_help">Прогноз закривається <strong>за 10 хв</strong> до старту (Варшава). На закритому матчі — <strong>клік</strong>, щоб побачити ставки (купони друзів — у «Лідери»). Перед новим туром — <strong>PDF-купон</strong> або «З коду внизу ↑».</p>
+  <div id="coupon-storage" style="display:none" aria-hidden="true">
+    <textarea id="ticketInput"></textarea>
+    <textarea id="ticketOutput" readonly></textarea>
+    <div id="coupon-buttons"></div>
     <div id="import-status" class="import-status"></div>
-    <div class="row" style="margin-bottom:.5rem">
-      <label class="coupon-upload-label">
-        <span data-i18n="upload_pdf">📎 Завантажити PDF-купон</span>
-        <input type="file" id="couponPdfInput" accept=".pdf,application/pdf" onchange="importCouponPdf(this)">
-      </label>
-      <button class="primary" id="btn-load-coupon" onclick="importTicket()" data-i18n="load_coupon">Завантажити купон</button>
-      <button id="btn-from-code" onclick="importFromOutput()" data-i18n="from_code">З коду внизу ↑</button>
-    </div>
-    <textarea id="ticketInput" placeholder="Код з PDF (внизу купона) — FIFA26C|..."></textarea>
-    <div id="coupon-buttons" class="row" style="margin:.5rem 0"></div>
-    <textarea id="ticketOutput" readonly placeholder="Код накопичувального купона з'явиться після закриття туру..." style="min-height:48px;font-size:.72rem"></textarea>
-    <div class="row" style="margin-top:.5rem">
-      <button id="btn-copy-ticket" onclick="copyTicket()" data-i18n="copy_code">Копіювати код купона</button>
-      <button id="btn-print-coupon" onclick="printCumulativeCoupon()" data-i18n="print_coupon">📄 Друк накопичувального купона</button>
-    </div>
-    </div>
-  </details>
+  </div>
 
   <div class="progress-bar">
     <div id="progress-text">Заповнено: 0 / 104 матчів</div>
@@ -753,22 +768,6 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
   </div>
 
   <div id="panel-leaderboard" class="panel">
-    <details class="ticket-panel collapse-panel" style="margin-bottom:1rem">
-      <summary data-i18n="lb_summary">📥 Імпорт купонів — таблиця лідерів</summary>
-      <div class="collapse-body">
-      <p id="lb-help" style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem" data-i18n-html="lb_help">Завантаж <strong>PDF</strong> або встав текст з купона. <strong>Натисни імʼя гравця</strong> — побачиш усі його прогнози по турах.</p>
-      <label class="coupon-upload-label" style="margin-bottom:.5rem">
-        <span data-i18n="lb_pdf">📎 PDF купони друзів</span>
-        <input type="file" id="leaderboardPdfInput" accept=".pdf,application/pdf" multiple onchange="importLeaderboardPdfs(this)">
-      </label>
-      <textarea id="leaderboardInput" placeholder="Встав сюди текст з PDF або купона (може бути на кількох рядках)..." style="min-height:100px;margin-top:.5rem"></textarea>
-      <div class="row" style="margin-top:.5rem">
-        <button class="primary" id="btn-lb-refresh" onclick="refreshLeaderboard()" data-i18n="lb_refresh">Оновити таблицю</button>
-        <button id="btn-lb-clear" onclick="clearLeaderboard()" data-i18n="lb_clear">Очистити</button>
-      </div>
-      <div id="leaderboard-status" style="font-size:.82rem;color:var(--accent);margin-top:.4rem"></div>
-      </div>
-    </details>
     <div id="cloud-sync-status" style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem"></div>
     <div id="leaderboard-table-wrap"></div>
   </div>
@@ -777,6 +776,69 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
     <div class="summary-block howto-block" id="howto-content"></div>
   </div>
 </main>
+
+<dialog id="login-choice-dialog" class="cloud-login-dialog">
+  <h3 data-i18n="login_choice_title">Увійти</h3>
+  <p class="cloud-login-hint" data-i18n="login_choice_hint">Обери спосіб входу</p>
+  <div class="cloud-login-actions" style="flex-direction:column">
+    <button type="button" class="gold" onclick="openCloudAuthFromChoice('login')" data-i18n="login_choice_pin">Нік + PIN</button>
+    <button type="button" class="primary" onclick="openCouponLoginFromChoice()" data-i18n="login_choice_coupon">Купон (PDF або код)</button>
+    <button type="button" onclick="closeLoginChoiceDialog()" data-i18n="btn_close">✕</button>
+  </div>
+</dialog>
+
+<dialog id="coupon-login-dialog" class="cloud-login-dialog">
+  <form onsubmit="event.preventDefault(); submitCouponLogin();">
+    <h3 data-i18n="coupon_login_title">Увійти купоном</h3>
+    <p class="cloud-login-hint" data-i18n="coupon_login_hint">Встав код з PDF-купона або завантаж файл. Купон має містити нік і PIN (після закриття туру).</p>
+    <label class="coupon-upload-label" style="display:block;margin-bottom:.5rem">
+      <span data-i18n="upload_pdf">📎 Завантажити PDF-купон</span>
+      <input type="file" id="coupon-login-pdf" accept=".pdf,application/pdf" onchange="importCouponLoginPdf(this)">
+    </label>
+    <textarea id="coupon-login-input" rows="4" style="width:100%;box-sizing:border-box;font-size:.72rem" placeholder="FIFA26C|..."></textarea>
+    <p id="coupon-login-error" class="cloud-login-error"></p>
+    <div class="cloud-login-actions">
+      <button type="submit" class="gold" data-i18n="coupon_login_submit">Увійти</button>
+      <button type="button" onclick="closeCouponLoginDialog()" data-i18n="btn_close">✕</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="cloud-auth-dialog" class="cloud-login-dialog">
+  <form onsubmit="event.preventDefault(); submitCloudAuth();">
+    <h3 id="cloud-auth-title" data-i18n="cloud_login_title">Увійти</h3>
+    <p id="cloud-auth-seal-note" data-i18n="cloud_auth_seal_note">Прогрес збережено — увійди або створи акаунт, щоб закрити тур.</p>
+    <div class="cloud-auth-tabs">
+      <button type="button" class="cloud-auth-tab active" id="cloud-auth-tab-login" onclick="setAuthDialogMode('login')" data-i18n="btn_cloud_login">Увійти</button>
+      <button type="button" class="cloud-auth-tab" id="cloud-auth-tab-register" onclick="setAuthDialogMode('register')" data-i18n="btn_cloud_register">Створити акаунт</button>
+    </div>
+    <p id="cloud-auth-hint" class="cloud-login-hint" data-i18n="cloud_login_hint_short">Вже є акаунт — введи нік і PIN.</p>
+    <label for="cloud-auth-name" data-i18n="cloud_login_nick">Нік</label>
+    <input type="text" id="cloud-auth-name" maxlength="40" autocomplete="username">
+    <label for="cloud-auth-pin" data-i18n="cloud_login_pin">PIN (4–12 символів)</label>
+    <input type="password" id="cloud-auth-pin" maxlength="12" autocomplete="current-password">
+    <div id="cloud-auth-pin2-wrap" style="display:none">
+      <label for="cloud-auth-pin2" data-i18n="cloud_register_pin_confirm">Повтори PIN</label>
+      <input type="password" id="cloud-auth-pin2" maxlength="12" autocomplete="new-password">
+    </div>
+    <p id="cloud-auth-error" class="cloud-login-error"></p>
+    <div class="cloud-login-actions">
+      <button type="submit" class="gold" id="cloud-auth-submit" data-i18n="cloud_login_submit">Увійти</button>
+      <button type="button" onclick="closeCloudAuthDialog()" data-i18n="btn_close">✕</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="seal-confirm-dialog" class="seal-confirm-dialog">
+  <h3 id="seal-confirm-title" data-i18n="seal_confirm_title">Підтвердити закриття туру</h3>
+  <p id="seal-confirm-sub" style="font-size:.88rem;color:var(--muted);margin:.25rem 0 .5rem"></p>
+  <div class="seal-preview-wrap" id="seal-preview-wrap"></div>
+  <p style="font-size:.85rem;margin:.75rem 0" data-i18n="seal_confirm_question">Все правильно? Після закриття змінити прогнози цього туру не можна.</p>
+  <div class="cloud-login-actions">
+    <button type="button" class="gold" id="seal-confirm-yes" onclick="confirmSealProceed()" data-i18n="seal_confirm_yes">Так, закрити тур</button>
+    <button type="button" onclick="closeSealConfirmDialog()" data-i18n="seal_confirm_back">Назад</button>
+  </div>
+</dialog>
 
 <script src="i18n.js"></script>
 <script src="sync-config.js"></script>
@@ -1547,8 +1609,7 @@ function collectMatchPredictions(matchId) {
 
   (window._lbEntries || []).forEach(addEntry);
   if (seen.size <= 1) {
-    const codes = typeof mergeLeaderboardCodes === 'function' ? mergeLeaderboardCodes() : loadLeaderboardCodes();
-    codes.forEach(code => {
+    getActiveLeaderboardCodes().forEach(code => {
       try { addEntry(leaderboardEntryFromCoupon(code)); } catch (e) { /* skip */ }
     });
   }
@@ -1656,8 +1717,8 @@ function applyStaticI18n() {
   if (tin) tin.placeholder = t('placeholder_ticket_in');
   const tout = document.getElementById('ticketOutput');
   if (tout) tout.placeholder = t('placeholder_ticket_out');
-  const lbin = document.getElementById('leaderboardInput');
-  if (lbin) lbin.placeholder = t('placeholder_lb');
+  const clin = document.getElementById('coupon-login-input');
+  if (clin) clin.placeholder = t('placeholder_ticket_in');
   const btnCoupon = document.getElementById('btn-coupon');
   if (btnCoupon) btnCoupon.title = t('title_coupon');
   document.documentElement.style.setProperty('--match-click-hint', `"${t('tag_click_bets')}"`);
@@ -1741,6 +1802,81 @@ function getRoundMatchIds(roundId) {
 }
 
 function isRoundSealed(roundId) { return !!sealedRounds[roundId]; }
+
+function isRoundExpiredByTime(roundId) {
+  const ids = getRoundMatchIds(roundId);
+  if (!ids.length) return false;
+  const r = ROUNDS[roundId];
+  if (r.type === 'group') {
+    return ids.every(id => {
+      const m = MATCHES.find(x => x.id === id);
+      return m?.done || isKickoffLockActive(id);
+    });
+  }
+  return ids.every(id => KO_ACTUAL[id] || isKickoffLockActive(id));
+}
+
+function canSealRoundByOrder(roundId) {
+  const idx = ROUND_ORDER.indexOf(roundId);
+  for (let i = 0; i < idx; i++) {
+    if (!isRoundSealed(ROUND_ORDER[i])) return false;
+  }
+  if (roundId.startsWith('KO') && !['G1', 'G2', 'G3'].every(isRoundSealed)) return false;
+  return true;
+}
+
+function buildRoundSealSnapshot(roundId) {
+  const snap = { scores: {}, sealedAt: new Date().toISOString() };
+  const r = ROUNDS[roundId];
+  if (r.type === 'group') {
+    MATCHES.filter(m => m.md === r.md && !m.done).forEach(m => {
+      snap.scores[m.id] = { ...(scores[m.id] || { h: '', a: '' }) };
+    });
+  } else {
+    for (let id = r.from; id <= r.to; id++) {
+      if (scores[id] && scores[id].h !== '') snap.scores[id] = { ...scores[id] };
+    }
+  }
+  return snap;
+}
+
+function applyRoundSealCore(roundId, snap, opts) {
+  opts = opts || {};
+  const prevTotal = calcTotalPoints().total;
+  sealedRounds[roundId] = snap;
+  const roundPts = calcRoundPoints(roundId).points;
+  sealedRounds[roundId].pointsAtSeal = roundPts;
+  sealedRounds[roundId].totalAtSeal = prevTotal + roundPts;
+  if (opts.auto) sealedRounds[roundId].autoSealed = true;
+
+  const r = ROUNDS[roundId];
+  if (r.type === 'group') {
+    MATCHES.filter(m => m.md === r.md && !m.done).forEach(m => { scores[m.id] = { h: '', a: '' }; });
+  } else {
+    for (let id = r.from; id <= r.to; id++) scores[id] = { h: '', a: '' };
+  }
+  return { roundPts, prevTotal, total: prevTotal + roundPts };
+}
+
+function autoSealExpiredRounds() {
+  let changed = false;
+  for (const roundId of ROUND_ORDER) {
+    if (!canSealRoundByOrder(roundId)) continue;
+    if (isRoundSealed(roundId)) continue;
+    if (!isRoundExpiredByTime(roundId)) continue;
+    const snap = buildRoundSealSnapshot(roundId);
+    snap.autoSealed = true;
+    applyRoundSealCore(roundId, snap, { auto: true });
+    changed = true;
+  }
+  if (changed) {
+    const ticket = buildCumulativeTicketString();
+    lastTicket = ticket;
+    document.getElementById('ticketOutput').value = ticket;
+    saveData(true);
+  }
+  return changed;
+}
 
 function getCurrentOpenRound() {
   return ROUND_ORDER.find(r => !isRoundSealed(r)) || null;
@@ -2114,7 +2250,8 @@ function renderSealBars() {
     const sealed = isRoundSealed(roundId);
     const pts = sealed ? calcRoundPoints(roundId).points : 0;
     if (sealed) {
-      return `<span class="hint">${t('seal_locked', { round: roundLabel(roundId), pts })}</span>`;
+      const autoNote = sealedRounds[roundId]?.autoSealed ? ' ' + t('seal_auto_note') : '';
+      return `<span class="hint">${t('seal_locked', { round: roundLabel(roundId), pts })}${autoNote}</span>`;
     }
     const hint = `<span class="hint">${t('seal_active', { round: roundLabel(roundId) })}${missing ? t('seal_missing', { n: missing }) : t('seal_ready')}</span>`;
     if (!withButton) return hint;
@@ -2234,6 +2371,9 @@ function buildRoundTicketString(roundId) {
 }
 
 function getPlayerName() {
+  if (typeof isCloudLoggedIn === 'function' && isCloudLoggedIn() && typeof getCloudSessionName === 'function') {
+    return getCloudSessionName();
+  }
   return (document.getElementById('playerName').value || '').trim();
 }
 
@@ -2259,11 +2399,15 @@ function ensurePlayerNameBeforeSeal() {
 
 function updatePlayerNameField() {
   const el = document.getElementById('playerName');
-  const locked = ROUND_ORDER.some(isRoundSealed);
+  const sealed = ROUND_ORDER.some(isRoundSealed);
+  const cloudLocked = typeof isSyncEnabled === 'function' && isSyncEnabled()
+    && typeof isCloudLoggedIn === 'function' && isCloudLoggedIn();
+  if (cloudLocked) el.value = getCloudSessionName();
+  const locked = sealed || cloudLocked;
   el.readOnly = locked;
   el.placeholder = locked ? el.value || t('placeholder_player_locked') : t('placeholder_player');
   el.style.opacity = locked ? '0.9' : '';
-  el.title = locked ? t('name_locked_title') : '';
+  el.title = cloudLocked ? t('name_cloud_locked_title') : (locked ? t('name_locked_title') : '');
 }
 
 function captureUiState() {
@@ -2361,28 +2505,50 @@ function normalizeCouponText(raw) {
   return normalizeB64(raw);
 }
 
-function buildCumulativeTicketString() {
+function buildCumulativeTicketPayload() {
   const sealed = ROUND_ORDER.filter(isRoundSealed);
-  if (!sealed.length) return '';
+  if (!sealed.length) return null;
   const payload = {
-    v: 3,
+    v: 4,
     name: getPlayerName() || t('placeholder_player_locked'),
     sealedRounds,
     lastRound: sealed[sealed.length - 1],
     updatedAt: new Date().toISOString()
   };
+  if (typeof isCloudLoggedIn === 'function' && isCloudLoggedIn() && typeof loadPlayerPin === 'function') {
+    const pin = loadPlayerPin();
+    if (pin) payload.pin = pin;
+  }
+  return payload;
+}
+
+function encodeCouponPayload(payload) {
   return 'FIFA26C|' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+
+function stripPinFromCouponCode(code) {
+  const parsed = parseCouponRaw(code);
+  const data = { ...parsed.data };
+  delete data.pin;
+  return canonicalCouponCode(data);
+}
+
+function buildCumulativeTicketString() {
+  const payload = buildCumulativeTicketPayload();
+  if (!payload) return '';
+  return encodeCouponPayload(payload);
 }
 
 function canonicalCouponCode(data) {
   const payload = {
-    v: data.v || 3,
+    v: data.v || 4,
     name: data.name || data.playerName || t('placeholder_player_locked'),
     sealedRounds: data.sealedRounds,
     lastRound: data.lastRound || ROUND_ORDER.filter(r => data.sealedRounds?.[r]).pop(),
     updatedAt: data.updatedAt || new Date().toISOString()
   };
-  return 'FIFA26C|' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  if (data.pin) payload.pin = data.pin;
+  return encodeCouponPayload(payload);
 }
 
 function parseCouponRaw(raw) {
@@ -2605,7 +2771,7 @@ function buildCouponDocument(roundId) {
   .foot { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #999; font-size: 7px; color: #333; line-height: 1.3; }
   .coupon-code { font-family: 'Courier New', monospace; font-size: 5.5px; line-height: 1.15; white-space: pre-wrap; word-break: break-all; margin: 4px 0 0; padding: 0; border: none; background: transparent; color: #222; }
   .when { font-size: 7px; color: #666; margin-top: 1px; }
-  .legend { font-size: 7px; color: #666; margin-top: 4px; }
+  .privacy-warn { font-size: 8px; font-weight: bold; color: #900; border: 2px solid #c00; padding: 6px 4px; margin: 8px 0; text-align: center; line-height: 1.35; background: #fff5f5; }
   @page { size: 80mm auto; margin: 4mm; }
   @media print { html, body { width: 80mm; padding: 0; } .slip { border: none; } }
 </style></head><body>
@@ -2626,7 +2792,8 @@ function buildCouponDocument(roundId) {
     <div><strong>ВСЬОГО ОЧОК: ${total}</strong></div>
   </div>
   <div class="legend">3=точний · 2=різниця · 1=результат · 0=промах · —=ще не зіграно</div>
-  <div class="foot"><strong>КОД ДЛЯ ІМПОРТУ / ЛІДЕРІВ</strong> — завантаж цей PDF у додаток або кнопка «З коду внизу»:<pre class="coupon-code">${code}</pre></div>
+  <div class="privacy-warn">${t('coupon_privacy_warn')}</div>
+  <div class="foot"><strong>${t('coupon_foot_title')}</strong> — ${t('coupon_foot_hint')}<pre class="coupon-code">${code}</pre></div>
 </div>
 </body></html>`;
 }
@@ -3039,42 +3206,119 @@ function renderScoreboard() {
     : t('breakdown_empty');
 }
 
-async function sealRound(roundId) {
-  const missing = countMissingInRound(roundId);
-  if (missing) { alert(t('alert_fill_missing', { n: missing })); return; }
-  if (isRoundSealed(roundId)) return;
-  if (typeof ensurePlayerAuthBeforeSeal === 'function') {
-    if (!ensurePlayerAuthBeforeSeal()) return;
-  } else if (!ensurePlayerNameBeforeSeal()) return;
-  if (roundId.startsWith('KO') && !['G1','G2','G3'].every(isRoundSealed)) {
-    alert(t('alert_groups_first')); return;
-  }
+let _pendingSealRoundId = null;
 
-  const snap = { scores: {}, sealedAt: new Date().toISOString() };
+function buildSealPreviewHtml(roundId) {
   const r = ROUNDS[roundId];
+  const rows = [];
   if (r.type === 'group') {
-    MATCHES.filter(m => m.md === r.md && !m.done).forEach(m => {
-      snap.scores[m.id] = { ...scores[m.id] };
+    MATCHES.filter(m => m.md === r.md && !m.done && canEditGroupMatch(m)).forEach(m => {
+      const sc = scores[m.id];
+      if (!isPredFilled(sc)) return;
+      rows.push({
+        label: `${teamLabel(m.h)} — ${teamLabel(m.a)}`,
+        when: kickoffLabel(m.id, ''),
+        pred: `${sc.h}:${sc.a}`
+      });
     });
   } else {
+    const r32 = buildR32Teams();
     for (let id = r.from; id <= r.to; id++) {
-      if (scores[id] && scores[id].h !== '') {
-        snap.scores[id] = { ...scores[id] };
-      }
+      if (!canEditKoMatch(id)) continue;
+      const sc = scores[id];
+      if (!isPredFilled(sc)) continue;
+      const teams = getKoTeamsForMatch(id, r32);
+      const label = teams.h && teams.a ? `${teamLabel(teams.h)} — ${teamLabel(teams.a)}` : 'M' + id;
+      let pred = `${sc.h}:${sc.a}`;
+      if (+sc.h === +sc.a && sc.adv) pred += ' (' + teamLabel(sc.adv) + ')';
+      rows.push({ label, when: kickoffLabel(id, ''), pred });
     }
   }
+  if (!rows.length) return '<p style="padding:.5rem;color:var(--muted)">' + t('seal_preview_empty') + '</p>';
+  let html = '<table class="seal-preview-table"><thead><tr>';
+  html += '<th>' + t('lb_col_match') + '</th><th>' + t('lb_col_time') + '</th><th>' + t('lb_col_pred') + '</th></tr></thead><tbody>';
+  rows.forEach(row => {
+    html += `<tr><td>${row.label}</td><td>${row.when || '—'}</td><td><strong>${row.pred}</strong></td></tr>`;
+  });
+  html += '</tbody></table>';
+  return html;
+}
 
-  const prevTotal = calcTotalPoints().total;
-  sealedRounds[roundId] = snap;
-  const roundPts = calcRoundPoints(roundId).points;
-  sealedRounds[roundId].pointsAtSeal = roundPts;
-  sealedRounds[roundId].totalAtSeal = prevTotal + roundPts;
+function openSealConfirmDialog(roundId) {
+  _pendingSealRoundId = roundId;
+  const dlg = document.getElementById('seal-confirm-dialog');
+  const sub = document.getElementById('seal-confirm-sub');
+  const wrap = document.getElementById('seal-preview-wrap');
+  if (sub) sub.textContent = t('seal_confirm_sub', { round: roundLabel(roundId), name: getCloudSessionName() || getPlayerName() });
+  if (wrap) wrap.innerHTML = buildSealPreviewHtml(roundId);
+  if (dlg?.showModal) dlg.showModal();
+}
 
-  if (r.type === 'group') {
-    MATCHES.filter(m => m.md === r.md && !m.done).forEach(m => { scores[m.id] = { h: '', a: '' }; });
-  } else {
-    for (let id = r.from; id <= r.to; id++) scores[id] = { h: '', a: '' };
+function closeSealConfirmDialog() {
+  _pendingSealRoundId = null;
+  const dlg = document.getElementById('seal-confirm-dialog');
+  if (dlg?.close) dlg.close();
+}
+
+function confirmSealProceed() {
+  const roundId = _pendingSealRoundId;
+  closeSealConfirmDialog();
+  if (roundId) executeSealRound(roundId);
+}
+
+function validateSealPreconditions(roundId) {
+  const missing = countMissingInRound(roundId);
+  if (missing) { alert(t('alert_fill_missing', { n: missing })); return false; }
+  if (isRoundSealed(roundId)) {
+    alert(t('alert_round_already_sealed', { round: roundLabel(roundId) }));
+    return false;
   }
+  if (typeof wasRoundSubmitted === 'function' && wasRoundSubmitted(roundId)) {
+    alert(t('alert_round_already_synced', { round: roundLabel(roundId) }));
+    return false;
+  }
+  const idx = ROUND_ORDER.indexOf(roundId);
+  for (let i = 0; i < idx; i++) {
+    if (!isRoundSealed(ROUND_ORDER[i])) {
+      alert(t('alert_seal_order', { round: roundLabel(ROUND_ORDER[i]) }));
+      return false;
+    }
+  }
+  if (roundId.startsWith('KO') && !['G1','G2','G3'].every(isRoundSealed)) {
+    alert(t('alert_groups_first'));
+    return false;
+  }
+  return true;
+}
+
+async function sealRound(roundId) {
+  if (!validateSealPreconditions(roundId)) return;
+
+  if (typeof isSyncEnabled === 'function' && isSyncEnabled() && typeof isCloudLoggedIn === 'function' && !isCloudLoggedIn()) {
+    const ok = await requireCloudAuthForSeal(roundId);
+    if (!ok) return;
+  }
+
+  continueSealRound(roundId);
+}
+
+function continueSealRound(roundId) {
+  if (!validateSealPreconditions(roundId)) return;
+
+  if (typeof isCloudLoggedIn === 'function' && isCloudLoggedIn()) {
+    const el = document.getElementById('playerName');
+    if (el) el.value = getCloudSessionName();
+    openSealConfirmDialog(roundId);
+    return;
+  }
+
+  if (!ensurePlayerNameBeforeSeal()) return;
+  executeSealRound(roundId);
+}
+
+async function executeSealRound(roundId) {
+  const snap = buildRoundSealSnapshot(roundId);
+  const { roundPts, total } = applyRoundSealCore(roundId, snap);
 
   const ticket = buildCumulativeTicketString();
   lastTicket = ticket;
@@ -3084,20 +3328,22 @@ async function sealRound(roundId) {
 
   const next = getCurrentOpenRound();
   let extraMsg = '';
-  if (typeof syncSubmitRound === 'function' && isSyncEnabled()) {
+  if (typeof syncSubmitRound === 'function' && isSyncEnabled() && isCloudLoggedIn()) {
     const res = await syncSubmitRound(roundId, ticket);
     if (res.ok) {
       extraMsg = '\n\n' + (res.pendingApproval ? t('sync_submitted_pending') : t('sync_submitted'));
       await refreshCloudLeaderboard();
     } else if (!res.disabled) {
-      extraMsg = '\n\n' + t('sync_submit_fail', { msg: res.error || '?' });
+      const errKey = res.error === 'already_submitted' || res.error === 'Round already submitted'
+        ? 'sync_already_submitted' : null;
+      extraMsg = '\n\n' + (errKey ? t(errKey) : t('sync_submit_fail', { msg: res.error || '?' }));
     }
     renderCloudSyncStatus();
   }
   alert(t('alert_seal_ok', {
     round: roundLabel(roundId),
     pts: roundPts,
-    total: prevTotal + roundPts,
+    total,
     next: next ? t('alert_seal_next', { round: roundLabel(next) }) : ''
   }) + extraMsg);
   printRoundCoupon(roundId);
@@ -3122,12 +3368,122 @@ function buildTicket() {
   return 'FIFA26|' + btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
 }
 
+function openLoginChoiceDialog(opts) {
+  window._authFromSeal = !!opts?.fromSeal;
+  document.getElementById('login-choice-dialog')?.showModal();
+}
+
+function closeLoginChoiceDialog() {
+  document.getElementById('login-choice-dialog')?.close();
+  if (window._authPromiseResolve) {
+    window._authPromiseResolve(false);
+    window._authPromiseResolve = null;
+    window._authFromSeal = false;
+    window._sealAfterAuthRoundId = null;
+  }
+}
+
+function openCloudAuthFromChoice(mode) {
+  closeLoginChoiceDialog();
+  openCloudAuthDialog({ mode: mode || 'login', loginOnly: true, fromSeal: window._authFromSeal });
+}
+
+function openCouponLoginFromChoice() {
+  closeLoginChoiceDialog();
+  openCouponLoginDialog({ fromSeal: window._authFromSeal });
+}
+
+function openCouponLoginDialog(opts) {
+  opts = opts || {};
+  window._authFromSeal = !!opts.fromSeal;
+  const inp = document.getElementById('coupon-login-input');
+  const err = document.getElementById('coupon-login-error');
+  if (inp) inp.value = '';
+  if (err) err.textContent = '';
+  document.getElementById('coupon-login-dialog')?.showModal();
+}
+
+function closeCouponLoginDialog() {
+  document.getElementById('coupon-login-dialog')?.close();
+  if (window._authPromiseResolve) {
+    window._authPromiseResolve(false);
+    window._authPromiseResolve = null;
+    window._authFromSeal = false;
+    window._sealAfterAuthRoundId = null;
+  }
+}
+
+async function importCouponLoginPdf(input) {
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file) return;
+  const codes = await extractCouponsFromPdf(file);
+  if (codes[0]) document.getElementById('coupon-login-input').value = codes[0];
+  else alert(t('alert_lb_no_codes'));
+}
+
+async function submitCouponLogin() {
+  const raw = document.getElementById('coupon-login-input')?.value?.trim() || '';
+  const errEl = document.getElementById('coupon-login-error');
+  if (!raw) {
+    if (errEl) errEl.textContent = t('alert_load_coupon');
+    return;
+  }
+  try {
+    const parsed = parseCouponRaw(raw);
+    const name = parsed.data.name || parsed.data.playerName;
+    const pin = parsed.data.pin;
+    if (!name) throw new Error(t('alert_no_name'));
+    if (!pin) throw new Error(t('coupon_login_no_pin'));
+    if (!isSyncEnabled()) throw new Error(t('sync_cloud_off'));
+    const res = await syncLogin(name, pin);
+    if (!res.ok) throw new Error(res.error || '?');
+    if (!applyCouponGameState(parsed)) return;
+    if (typeof finishAuthDialog === 'function') finishAuthDialog(true);
+    else closeCouponLoginDialog();
+  } catch (e) {
+    let msg = e.message || String(e);
+    if (msg === 'Wrong PIN for this name') msg = t('cloud_login_wrong_pin');
+    if (msg === 'Account not found') msg = t('cloud_login_not_found');
+    if (errEl) errEl.textContent = msg;
+  }
+}
+
 function importFromOutput() {
   const raw = document.getElementById('ticketOutput').value;
   if (!raw?.trim()) { alert(t('alert_no_ticket')); return; }
   const coupons = extractAllCoupons(raw);
   document.getElementById('ticketInput').value = coupons[0] || raw.trim();
   importTicket();
+}
+
+function applyCouponGameState(parsed, opts) {
+  opts = opts || {};
+  const merged = mergeCouponSealed(parsed);
+  const hadLater = ROUND_ORDER.some(r => sealedRounds[r] && !merged[r]);
+  if (hadLater && !opts.skipConfirm && !confirm(t('confirm_replace'))) return false;
+
+  sealedRounds = merged;
+  scores = {};
+  if (parsed.data.scores && parsed.type === 'full') scores = parsed.data.scores;
+  if (parsed.data.koWinners) {
+    Object.entries(parsed.data.koWinners).forEach(([id, team]) => {
+      if (!scores[id] || scores[id].h === '') scores[id] = { h: '1', a: '0', adv: team };
+    });
+  }
+  const name = parsed.data.name || parsed.data.playerName;
+  if (name) document.getElementById('playerName').value = name;
+
+  initScores();
+  const open = getCurrentOpenRound();
+  if (open?.startsWith('G')) activeGroupRound = open;
+  if (open?.startsWith('KO')) activeKoRound = open;
+
+  lastTicket = buildCumulativeTicketString();
+  document.getElementById('ticketOutput').value = lastTicket;
+  saveData(true);
+  renderAll();
+  return true;
 }
 
 function importTicket() {
@@ -3137,36 +3493,14 @@ function importTicket() {
   try {
     const parsed = parseCouponRaw(raw);
     document.getElementById('ticketInput').value = parsed.code;
-    const merged = mergeCouponSealed(parsed);
-    const hadLater = ROUND_ORDER.some(r => sealedRounds[r] && !merged[r]);
-    if (hadLater && !confirm(t('confirm_replace'))) return;
-
-    sealedRounds = merged;
-    scores = {};
-    if (parsed.data.scores && (parsed.type === 'full')) scores = parsed.data.scores;
-    if (parsed.data.koWinners) {
-      Object.entries(parsed.data.koWinners).forEach(([id, team]) => {
-        if (!scores[id] || scores[id].h === '') scores[id] = { h: '1', a: '0', adv: team };
-      });
-    }
-    const name = parsed.data.name || parsed.data.playerName;
-    if (name) document.getElementById('playerName').value = name;
-
-    initScores();
-    const open = getCurrentOpenRound();
-    if (open?.startsWith('G')) activeGroupRound = open;
-    if (open?.startsWith('KO')) activeKoRound = open;
-
-    lastTicket = buildCumulativeTicketString();
-    document.getElementById('ticketOutput').value = lastTicket;
-    saveData(true);
-    renderAll();
+    if (!applyCouponGameState(parsed)) return;
 
     const { total, byRound } = calcTotalPoints();
     const sealed = ROUND_ORDER.filter(r => isRoundSealed(r));
     const lines = sealed.map(r => `${roundLabel(r)}: ${byRound[r] || 0}`);
     status.textContent = t('import_loaded', { rounds: sealed.length, total });
     status.style.color = 'var(--accent)';
+    const open = getCurrentOpenRound();
     alert(t('alert_coupon_ok', {
       lines: lines.join('\n'),
       total,
@@ -3198,67 +3532,18 @@ function leaderboardEntryFromCoupon(raw) {
 }
 
 function getActiveLeaderboardCodes() {
-  return typeof mergeLeaderboardCodes === 'function' ? mergeLeaderboardCodes() : loadLeaderboardCodes();
-}
-
-function loadLeaderboardCodes() {
-  try {
-    const raw = localStorage.getItem('fifa2026leaderboard');
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) { return []; }
-}
-
-function saveLeaderboardCodes(codes) {
-  localStorage.setItem('fifa2026leaderboard', JSON.stringify(codes));
+  return typeof getSyncCoupons === 'function' ? getSyncCoupons() : [];
 }
 
 async function refreshLeaderboard() {
-  if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
-    await refreshCloudLeaderboard();
-  }
-  const textarea = document.getElementById('leaderboardInput');
-  const existing = loadLeaderboardCodes();
-  const newCoupons = extractAllCoupons(textarea.value || '');
-  const allCodes = [...new Set([...existing, ...newCoupons])];
-  saveLeaderboardCodes(allCodes);
-  textarea.value = allCodes.join('\n\n');
-  renderLeaderboardTable(getActiveLeaderboardCodes());
-  if (newCoupons.length) {
-    const status = document.getElementById('leaderboard-status');
-    if (status) status.textContent = t('lb_status_added', { n: newCoupons.length, total: allCodes.length });
-  }
-}
-
-function clearLeaderboard() {
-  if (!confirm(t('confirm_clear_lb'))) return;
-  localStorage.removeItem('fifa2026leaderboard');
-  document.getElementById('leaderboardInput').value = '';
-  document.getElementById('leaderboard-table-wrap').innerHTML = '';
-}
-
-async function importLeaderboardPdfs(input) {
-  const files = [...(input.files || [])];
-  input.value = '';
-  const codes = loadLeaderboardCodes();
-  let added = 0;
-  for (const file of files) {
-    const found = await extractCouponsFromPdf(file);
-    for (const code of found) {
-      if (!codes.includes(code)) { codes.push(code); added++; }
-    }
-  }
-  saveLeaderboardCodes(codes);
-  document.getElementById('leaderboardInput').value = codes.join('\n\n');
-  renderLeaderboardTable(getActiveLeaderboardCodes());
-  if (added) alert(t('alert_lb_added', { n: added }));
-  else alert(t('alert_lb_no_codes'));
+  if (typeof refreshCloudLeaderboard === 'function') await refreshCloudLeaderboard();
 }
 
 function renderLeaderboardTable(codes) {
   const wrap = document.getElementById('leaderboard-table-wrap');
   if (!codes.length) {
     window._lbEntries = [];
-    wrap.innerHTML = `<p style="color:var(--muted);font-size:.85rem">${t('lb_empty')}</p>`;
+    wrap.innerHTML = `<p style="color:var(--muted);font-size:.85rem">${t('lb_empty_cloud')}</p>`;
     return;
   }
   const entries = [];
@@ -3383,6 +3668,7 @@ function renderSummary() {
 }
 
 function renderAll() {
+  autoSealExpiredRounds();
   applyStaticI18n();
   renderRoundTabs();
   renderSealBars();
@@ -3396,6 +3682,7 @@ function renderAll() {
   updateProgress();
   updatePlayerNameField();
   if (typeof renderCloudSyncStatus === 'function') renderCloudSyncStatus();
+  if (typeof updateCloudLoginUI === 'function') updateCloudLoginUI();
   renderLeaderboardTable(getActiveLeaderboardCodes());
 }
 
@@ -3425,7 +3712,10 @@ function resetAll() {
   sealedRounds = {}; scores = {};
   activeGroupRound = 'G1'; activeKoRound = 'KO1'; lastTicket = '';
   localStorage.removeItem('fifa2026predictor');
-  if (typeof clearPlayerPin === 'function') clearPlayerPin();
+  Object.keys(localStorage).forEach(k => {
+    if (k.startsWith('fifa2026syncmeta_')) localStorage.removeItem(k);
+  });
+  if (typeof syncLogout === 'function') syncLogout();
   initScores();
   document.getElementById('ticketInput').value = '';
   document.getElementById('ticketOutput').value = '';
@@ -3493,6 +3783,10 @@ if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
 
 setInterval(() => {
   if (document.hidden) return;
+  if (autoSealExpiredRounds()) {
+    renderAll();
+    return;
+  }
   renderGroups();
   renderKnockout();
   renderSealBars();
