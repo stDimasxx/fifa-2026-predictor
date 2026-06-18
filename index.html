@@ -469,6 +469,12 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 }
 .leaderboard-table .name-btn:hover { color: var(--accent); }
 .leaderboard-table .detail-col { width: 2.5rem; }
+.leaderboard-wrap, .lb-detail-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.leaderboard-table, .lb-detail-table { min-width: 100%; }
 
 .tvp-link {
   font-size: .85rem; color: var(--accent); text-decoration: none;
@@ -502,6 +508,44 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .lb-detail-table .pts-2 { color: #d4f070; }
 .lb-detail-table .pts-1 { color: var(--gold); }
 .lb-detail-table .pts-0 { color: #ff8080; }
+
+@media (max-width: 700px) {
+  .leaderboard-wrap, .lb-detail-table-wrap {
+    margin: 0 -.15rem;
+    padding-bottom: .2rem;
+  }
+  .leaderboard-table {
+    min-width: 580px;
+    font-size: .77rem;
+  }
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: .42rem .4rem;
+  }
+  .leaderboard-table .total-col { font-size: .95rem; }
+  .leaderboard-table .name-btn { max-width: 8.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .lb-detail-box {
+    padding: .8rem .75rem 1rem;
+  }
+  .lb-detail-head h3 {
+    font-size: 1rem;
+  }
+  .lb-detail-round h4 {
+    font-size: .82rem;
+  }
+  .lb-detail-table {
+    min-width: 560px;
+    font-size: .72rem;
+  }
+  .lb-detail-table th,
+  .lb-detail-table td {
+    padding: .32rem .3rem;
+  }
+  .lb-detail-table .when {
+    font-size: .63rem;
+  }
+}
 
 .import-status { font-size: .85rem; color: var(--accent); margin-top: .4rem; min-height: 1.2em; }
 
@@ -1505,7 +1549,7 @@ function showMatchPredictions(matchId) {
   if (!rows.length) {
     body.innerHTML = '<p style="color:var(--muted);font-size:.85rem">Поки ніхто не зафіксував прогноз на цей матч.<br>Додай купони друзів у вкладці «Лідери».</p>';
   } else {
-    body.innerHTML = `<table class="lb-detail-table"><tr><th>Гравець</th><th>Прогноз</th><th>Очки</th></tr>${
+    body.innerHTML = `<div class="lb-detail-table-wrap"><table class="lb-detail-table"><tr><th>Гравець</th><th>Прогн.</th><th>Оч.</th></tr>${
       rows.map(r => {
         const predStr = r.pred.h + ':' + r.pred.a + (r.pred.adv && +r.pred.h === +r.pred.a ? ' → ' + teamLabel(r.pred.adv) : '');
         const pts = act ? scorePrediction(r.pred.h, r.pred.a, act.h, act.a) : null;
@@ -1513,7 +1557,7 @@ function showMatchPredictions(matchId) {
         const ptsCls = pts != null ? `pts-${pts}` : '';
         return `<tr><td>${r.self ? '<strong>' + r.name + '</strong>' : r.name}</td><td>${predStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
       }).join('')
-    }</table>`;
+    }</table></div>`;
   }
   modal.style.display = 'block';
 }
@@ -3110,15 +3154,15 @@ function renderLeaderboardTable(codes) {
   window._lbEntries = entries;
   entries.sort((a, b) => b.total - a.total || b.rounds - a.rounds);
   const cols = ROUND_ORDER.filter(rid => entries.some(e => e.snap[rid]));
-  let html = '<table class="leaderboard-table"><tr><th>#</th><th>Гравець</th>';
+  let html = '<div class="leaderboard-wrap"><table class="leaderboard-table"><tr><th>#</th><th>Гравець</th>';
   cols.forEach(rid => { html += `<th>${ROUNDS[rid].name.replace(' ', '<br>')}</th>`; });
-  html += '<th>Тури</th><th class="total-col">Всього</th><th class="detail-col">👁</th></tr>';
+  html += '<th>Тури</th><th class="total-col">Всь.</th><th class="detail-col">👁</th></tr>';
   entries.forEach((e, i) => {
     html += `<tr class="${i === 0 ? 'leader' : ''}"><td>${i + 1}</td><td class="name"><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})">${e.name}</button></td>`;
     cols.forEach(rid => { html += `<td>${e.byRound[rid] != null ? e.byRound[rid] : '—'}</td>`; });
     html += `<td>${e.rounds}/8</td><td class="total-col">${e.total}</td><td><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})" title="Деталі прогнозів">👁</button></td></tr>`;
   });
-  html += '</table>';
+  html += '</table></div>';
   if (errors.length) html += `<p style="font-size:.75rem;color:#ff8a8a;margin-top:.5rem">Не прочитано: ${errors.length} код(ів)</p>`;
   wrap.innerHTML = html;
 }
@@ -3157,7 +3201,7 @@ function buildLeaderboardRoundHtml(snap, roundId) {
     extra = `<p style="font-size:.72rem;color:var(--muted);margin:.35rem 0">8×3-є місце: ${adv.map(x => `${x.g}: ${teamLabel(x.team)}`).join(' · ')}</p>`;
   }
   return `<div class="lb-detail-round"><h4>${ROUNDS[roundId].name} — ${roundPts} оч.</h4>${extra}
-    <table class="lb-detail-table"><tr><th>Час</th><th>Матч</th><th>Прогноз</th><th>Результат</th><th>Очки</th></tr>${rows}</table></div>`;
+    <div class="lb-detail-table-wrap"><table class="lb-detail-table"><tr><th>Час</th><th>Матч</th><th>Прогн.</th><th>Рез.</th><th>Оч.</th></tr>${rows}</table></div></div>`;
 }
 
 function showLeaderboardDetails(index) {
