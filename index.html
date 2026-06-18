@@ -59,6 +59,25 @@ header.hero {
   border-bottom: 2px solid transparent;
   border-image: linear-gradient(90deg, var(--magenta), var(--gold), var(--accent)) 1;
   box-shadow: 0 4px 40px rgba(0,0,0,.5);
+  transition: box-shadow .2s ease;
+}
+
+header.hero.header-compact {
+  box-shadow: 0 2px 20px rgba(0,0,0,.55);
+}
+
+header.hero.header-compact .header-inner { padding: .45rem 1rem .55rem; }
+header.hero.header-compact .brand-icon { width: 34px; height: 34px; font-size: 1rem; box-shadow: none; }
+header.hero.header-compact .brand h1 { font-size: 1.25rem; }
+header.hero.header-compact .brand .sub { display: none; }
+header.hero.header-compact .tabs { margin-top: .45rem; gap: .35rem; }
+header.hero.header-compact .tab { padding: .38rem .75rem; font-size: .68rem; }
+header.hero.header-compact .toolbar input { min-width: 0; width: 7.5rem; padding: .4rem .6rem; font-size: .82rem; }
+header.hero.header-compact .toolbar button { padding: .4rem .55rem; font-size: .78rem; }
+
+@media (max-width: 600px) {
+  header.hero.header-compact .toolbar button { display: none; }
+  header.hero.header-compact .toolbar input { flex: 1; width: auto; max-width: none; }
 }
 
 .header-inner { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 1rem; }
@@ -206,6 +225,14 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .scoreboard .breakdown { font-size: .85rem; color: var(--muted); margin-top: .4rem; max-width: 600px; }
 .scoreboard .pts-legend { font-size: .72rem; color: var(--muted); margin-top: .35rem; }
 
+.scoreboard.scoreboard-compact {
+  padding: .55rem 1rem; margin-bottom: .75rem; gap: .5rem;
+}
+.scoreboard.scoreboard-compact .score-label { font-size: .7rem; }
+.scoreboard.scoreboard-compact .total { font-size: 2rem; }
+.scoreboard.scoreboard-compact .pts-legend,
+.scoreboard.scoreboard-compact .breakdown { display: none; }
+
 /* ── Cards & panels ── */
 .progress-bar, .ticket-panel, .third-place-info, .summary-block {
   background: var(--card); border: 1px solid var(--border);
@@ -291,6 +318,25 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
   border: 1px solid var(--border); border-radius: var(--radius);
   padding: 1rem 1.25rem; margin-bottom: 1.25rem;
   display: flex; flex-wrap: wrap; gap: .85rem; align-items: center; justify-content: space-between;
+}
+
+.seal-bar-top { padding: .65rem 1rem; margin-bottom: 1rem; }
+.seal-bar-top .hint { font-size: .82rem; }
+
+.seal-bar-bottom {
+  margin-top: 1.25rem; margin-bottom: .5rem;
+  padding: 1.1rem 1.25rem;
+  border-color: rgba(255,210,74,.35);
+  box-shadow: 0 8px 32px rgba(0,0,0,.35);
+}
+
+.seal-bar-bottom .seal-action-btn {
+  width: 100%; padding: .85rem 1.25rem; font-size: 1rem;
+}
+
+@media (min-width: 601px) {
+  .seal-bar-bottom { flex-direction: row; }
+  .seal-bar-bottom .seal-action-btn { width: auto; min-width: 280px; }
 }
 
 .seal-bar .hint { font-size: .88rem; color: var(--muted); flex: 1; min-width: 200px; }
@@ -615,15 +661,17 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
 
   <div id="panel-groups" class="panel active">
     <div class="round-tabs" id="group-round-tabs"></div>
-    <div class="seal-bar" id="group-seal-bar"></div>
+    <div class="seal-bar seal-bar-top" id="group-seal-bar"></div>
     <div class="groups-grid" id="groups-container"></div>
+    <div class="seal-bar seal-bar-bottom" id="group-seal-bar-bottom"></div>
   </div>
 
   <div id="panel-knockout" class="panel">
     <div class="round-tabs" id="ko-round-tabs"></div>
-    <div class="seal-bar" id="ko-seal-bar"></div>
+    <div class="seal-bar seal-bar-top" id="ko-seal-bar"></div>
     <div class="third-place-info" id="third-info">Заповніть прогнози групового етапу, щоб сформувати сітку 1/16 фіналу.</div>
     <div id="knockout-container"></div>
+    <div class="seal-bar seal-bar-bottom" id="ko-seal-bar-bottom"></div>
     <div class="champion-box" id="champion-box">
       <div class="trophy">🏆</div>
       <div class="champ-label">Чемпіон світу 2026</div>
@@ -1927,27 +1975,50 @@ function renderRoundTabs() {
 function renderSealBars() {
   const open = getCurrentOpenRound();
   const gBar = document.getElementById('group-seal-bar');
+  const gBarBottom = document.getElementById('group-seal-bar-bottom');
   const kBar = document.getElementById('ko-seal-bar');
+  const kBarBottom = document.getElementById('ko-seal-bar-bottom');
 
-  function fillBar(el, roundId) {
-    if (!roundId || !roundId.startsWith(el === gBar ? 'G' : 'KO')) {
-      el.innerHTML = `<span class="hint">${isRoundSealed(activeGroupRound) && el === gBar ? 'Цей тур закрито — прогноз зафіксовано у квитку' : ''}${isRoundSealed(activeKoRound) && el === kBar ? 'Цей тур закрито — прогноз зафіксовано у квитку' : ''}</span>`;
-      return;
-    }
+  function sealHtml(roundId, withButton) {
     const missing = countMissingInRound(roundId);
     const sealed = isRoundSealed(roundId);
     const pts = sealed ? calcRoundPoints(roundId).points : 0;
-    el.innerHTML = sealed
-      ? `<span class="hint">🔒 ${ROUNDS[roundId].name} закрито · <strong style="color:var(--gold)">${pts} очок</strong> за зіграні матчі цього туру</span>`
-      : `<span class="hint">Активний тур: <strong>${ROUNDS[roundId].name}</strong>${missing ? ` · залишилось заповнити: ${missing}` : ' · готово до закриття!'}</span>
-         <button class="gold" onclick="sealRound('${roundId}')" ${missing ? 'disabled style="opacity:.5"' : ''}>🔒 Закрити тур і зберегти PDF-купон</button>`;
+    if (sealed) {
+      return `<span class="hint">🔒 ${ROUNDS[roundId].name} закрито · <strong style="color:var(--gold)">${pts} очок</strong> за зіграні матчі цього туру</span>`;
+    }
+    const hint = `<span class="hint">Активний тур: <strong>${ROUNDS[roundId].name}</strong>${missing ? ` · залишилось заповнити: ${missing}` : ' · готово до закриття!'}</span>`;
+    if (!withButton) return hint;
+    return `${hint}<button type="button" class="gold seal-action-btn" onclick="sealRound('${roundId}')" ${missing ? 'disabled style="opacity:.5"' : ''}>🔒 Закрити тур і зберегти PDF-купон</button>`;
   }
 
-  if (open && open.startsWith('G')) fillBar(gBar, open);
-  else gBar.innerHTML = `<span class="hint">${isRoundSealed(activeGroupRound) ? '🔒 ' + ROUNDS[activeGroupRound].name + ' закрито' : 'Груповий етап завершено'}</span>`;
+  function fillBars(topEl, bottomEl, roundId, kind) {
+    const isGroup = kind === 'G';
+    const active = open && open.startsWith(isGroup ? 'G' : 'KO');
+    if (!active || !roundId || !roundId.startsWith(isGroup ? 'G' : 'KO')) {
+      const rid = isGroup ? activeGroupRound : activeKoRound;
+      const msg = isGroup
+        ? (isRoundSealed(activeGroupRound) ? '🔒 ' + ROUNDS[activeGroupRound].name + ' закрито' : 'Груповий етап завершено')
+        : (isRoundSealed(activeKoRound) ? '🔒 ' + ROUNDS[activeKoRound].name + ' закрито' : 'Плей-оф: обери тур вище');
+      topEl.innerHTML = `<span class="hint">${msg}</span>`;
+      bottomEl.innerHTML = '';
+      bottomEl.style.display = 'none';
+      return;
+    }
+    topEl.innerHTML = sealHtml(roundId, false);
+    if (isRoundSealed(roundId)) {
+      bottomEl.innerHTML = '';
+      bottomEl.style.display = 'none';
+    } else {
+      bottomEl.style.display = '';
+      bottomEl.innerHTML = sealHtml(roundId, true);
+    }
+  }
 
-  if (open && open.startsWith('KO')) fillBar(kBar, open);
-  else kBar.innerHTML = `<span class="hint">${isRoundSealed(activeKoRound) ? '🔒 ' + ROUNDS[activeKoRound].name + ' закрито' : 'Плей-оф: обери тур вище'}</span>`;
+  if (open && open.startsWith('G')) fillBars(gBar, gBarBottom, open, 'G');
+  else fillBars(gBar, gBarBottom, null, 'G');
+
+  if (open && open.startsWith('KO')) fillBars(kBar, kBarBottom, open, 'KO');
+  else fillBars(kBar, kBarBottom, null, 'KO');
 }
 
 function isPredFilled(sc) {
@@ -3210,6 +3281,23 @@ document.querySelectorAll('.tab').forEach(tab => {
 });
 
 document.getElementById('playerName').addEventListener('input', () => saveData(true));
+
+(function initCompactChrome() {
+  const header = document.querySelector('header.hero');
+  const scoreboard = document.getElementById('scoreboard');
+  let ticking = false;
+  const apply = () => {
+    const compact = window.scrollY > 72;
+    header?.classList.toggle('header-compact', compact);
+    scoreboard?.classList.toggle('scoreboard-compact', compact);
+  };
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { apply(); ticking = false; });
+  }, { passive: true });
+  apply();
+})();
 
 document.addEventListener('error', e => {
   const img = e.target;
