@@ -39,6 +39,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   line-height: 1.5;
+  overscroll-behavior-y: none;
 }
 
 body::before {
@@ -472,8 +473,12 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .leaderboard-wrap, .lb-detail-table-wrap {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
+#panel-leaderboard { overflow-anchor: none; }
 .leaderboard-table, .lb-detail-table { min-width: 100%; }
 
 .tvp-link {
@@ -510,9 +515,14 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .lb-detail-table .pts-0 { color: #ff8080; }
 
 @media (max-width: 700px) {
+  main { padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)); }
+  header.hero .header-inner { padding-left: 1rem; padding-right: 1rem; }
+  header.hero.header-compact .toolbar input { min-width: 0; }
+  #cloud-user-chip { max-width: 7.5rem; }
   .leaderboard-wrap, .lb-detail-table-wrap {
-    margin: 0 -.15rem;
-    padding-bottom: .2rem;
+    margin: 0;
+    padding-bottom: calc(.5rem + env(safe-area-inset-bottom, 0px));
+    scroll-padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .leaderboard-table {
     min-width: 580px;
@@ -3627,6 +3637,7 @@ async function refreshLeaderboard() {
 
 function renderLeaderboardTable(codes) {
   const wrap = document.getElementById('leaderboard-table-wrap');
+  const prevScroll = wrap.querySelector('.leaderboard-wrap')?.scrollLeft || 0;
   if (!codes.length) {
     window._lbEntries = [];
     wrap.innerHTML = `<p style="color:var(--muted);font-size:.85rem">${t('lb_empty_cloud')}</p>`;
@@ -3652,6 +3663,8 @@ function renderLeaderboardTable(codes) {
   html += '</table></div>';
   if (errors.length) html += `<p style="font-size:.75rem;color:#ff8a8a;margin-top:.5rem">${t('lb_read_fail', { n: errors.length })}</p>`;
   wrap.innerHTML = html;
+  const lbWrap = wrap.querySelector('.leaderboard-wrap');
+  if (lbWrap && prevScroll) lbWrap.scrollLeft = prevScroll;
 }
 
 function ensureLeaderboardModal() {
@@ -3825,6 +3838,9 @@ document.querySelectorAll('.tab').forEach(tab => {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    const onLb = tab.dataset.tab === 'leaderboard';
+    document.body.classList.toggle('tab-leaderboard', onLb);
+    if (typeof setCompactChromeFrozen === 'function') setCompactChromeFrozen(onLb && window.innerWidth <= 700);
   });
 });
 
@@ -3834,17 +3850,31 @@ document.getElementById('playerName').addEventListener('input', () => saveData(t
   const header = document.querySelector('header.hero');
   const scoreboard = document.getElementById('scoreboard');
   let ticking = false;
-  const apply = () => {
-    const compact = window.scrollY > 72;
-    header?.classList.toggle('header-compact', compact);
-    scoreboard?.classList.toggle('scoreboard-compact', compact);
+  let compactOn = false;
+  let frozen = false;
+
+  function apply(force) {
+    if (frozen && !force) return;
+    const y = window.scrollY;
+    const next = compactOn ? y > 24 : y > 88;
+    if (!force && next === compactOn) return;
+    compactOn = next;
+    header?.classList.toggle('header-compact', compactOn);
+    scoreboard?.classList.toggle('scoreboard-compact', compactOn);
+  }
+
+  window.setCompactChromeFrozen = (on) => {
+    frozen = !!on;
+    if (frozen) compactOn = true;
+    apply(true);
   };
+
   window.addEventListener('scroll', () => {
-    if (ticking) return;
+    if (ticking || frozen) return;
     ticking = true;
-    requestAnimationFrame(() => { apply(); ticking = false; });
+    requestAnimationFrame(() => { apply(false); ticking = false; });
   }, { passive: true });
-  apply();
+  apply(true);
 })();
 
 document.addEventListener('error', e => {

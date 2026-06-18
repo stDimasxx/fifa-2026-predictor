@@ -131,6 +131,20 @@
     }
   }
 
+  function clearSavedPlayerName() {
+    try {
+      const raw = localStorage.getItem('fifa2026predictor');
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      data.playerName = '';
+      localStorage.setItem('fifa2026predictor', JSON.stringify(data));
+    } catch (e) { /* ignore */ }
+  }
+
+  function reloadAfterAuthChange() {
+    window.location.reload();
+  }
+
   function applyAuthSuccess(name, pin, data) {
     saveSession(name, pin, data.status);
     window._syncPlayerStatus = data.status;
@@ -141,8 +155,6 @@
     const el = document.getElementById('playerName');
     if (el) el.value = name;
     if (typeof saveData === 'function') saveData(true);
-    if (typeof updatePlayerNameField === 'function') updatePlayerNameField();
-    if (typeof renderAll === 'function') renderAll();
   }
 
   async function syncLogin(name, pin) {
@@ -181,9 +193,8 @@
 
   function syncLogout() {
     clearSession();
-    if (typeof updateCloudLoginUI === 'function') updateCloudLoginUI();
-    if (typeof renderCloudSyncStatus === 'function') renderCloudSyncStatus();
-    if (typeof updatePlayerNameField === 'function') updatePlayerNameField();
+    clearSavedPlayerName();
+    reloadAfterAuthChange();
   }
 
   async function syncFetchLeaderboard() {
@@ -342,15 +353,20 @@
     if (!success) {
       window._authFromSeal = false;
       window._sealAfterAuthRoundId = null;
+      updateCloudLoginUI();
+      renderCloudSyncStatus();
+      return;
     }
-    updateCloudLoginUI();
-    renderCloudSyncStatus();
-    if (success && window._authFromSeal && window._sealAfterAuthRoundId) {
+    if (window._authFromSeal && window._sealAfterAuthRoundId) {
       const rid = window._sealAfterAuthRoundId;
       window._sealAfterAuthRoundId = null;
       window._authFromSeal = false;
+      updateCloudLoginUI();
+      renderCloudSyncStatus();
       if (typeof continueSealRound === 'function') continueSealRound(rid);
+      return;
     }
+    reloadAfterAuthChange();
   }
 
   async function submitCloudAuth() {
