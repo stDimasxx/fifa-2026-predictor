@@ -1677,6 +1677,8 @@ const ROUNDS = {
   KO5: { name: 'Фінал і 3-є місце', type: 'ko', from: 103, to: 104 }
 };
 const ROUND_ORDER = ['G1','G2','G3','KO1','KO2','KO3','KO4','KO5'];
+/** Тури, пропущені організатором — 0 оч., заглушка в таблиці для всіх гравців */
+const SKIPPED_ROUNDS = ['G1'];
 
 // Реальні результати плей-оф (оновлюються автоматично)
 const KO_ACTUAL = {};
@@ -1692,7 +1694,7 @@ const ESPN_ABBREV = {
 
 let scores = {};
 let sealedRounds = {};
-let activeGroupRound = 'G1';
+let activeGroupRound = 'G2';
 let activeKoRound = 'KO1';
 let lastTicket = '';
 
@@ -1801,7 +1803,68 @@ function getRoundMatchIds(roundId) {
   return ids;
 }
 
-function isRoundSealed(roundId) { return !!sealedRounds[roundId]; }
+function isRoundSkipped(roundId) { return SKIPPED_ROUNDS.includes(roundId); }
+
+function buildSkippedRoundSnapshot(roundId) {
+  return {
+    skipped: true,
+    scores: {},
+    sealedAt: '2026-06-01T00:00:00.000Z',
+    pointsAtSeal: 0,
+    totalAtSeal: 0
+  };
+}
+
+function applySkippedRoundsPolicy() {
+  SKIPPED_ROUNDS.forEach(rid => {
+    sealedRounds[rid] = buildSkippedRoundSnapshot(rid);
+  });
+}
+
+function getCloudSealedSnap() {
+  if (typeof isCloudLoggedIn !== 'function' || !isCloudLoggedIn()) return null;
+  const sessionName = (typeof getCloudSessionName === 'function' ? getCloudSessionName() : '').trim().toLowerCase();
+  if (!sessionName) return null;
+  const row = (window._syncPlayers || []).find(p => String(p.name).trim().toLowerCase() === sessionName);
+  if (!row?.coupon) return null;
+  try {
+    return getSnapFromCoupon(parseCouponRaw(row.coupon));
+  } catch (e) {
+    return null;
+  }
+}
+
+function getEffectiveSealedRounds() {
+  applySkippedRoundsPolicy();
+  const cloud = getCloudSealedSnap();
+  if (cloud) {
+    const merged = {};
+    ROUND_ORDER.forEach(rid => {
+      if (cloud[rid]) merged[rid] = cloud[rid];
+      else if (isRoundSkipped(rid)) merged[rid] = buildSkippedRoundSnapshot(rid);
+    });
+    return merged;
+  }
+  return { ...sealedRounds };
+}
+
+function applyCloudSealedFromLeaderboard() {
+  if (!getCloudSealedSnap()) return;
+  const snap = getEffectiveSealedRounds();
+  ROUND_ORDER.forEach(rid => {
+    if (snap[rid]) sealedRounds[rid] = snap[rid];
+    else if (!isRoundSkipped(rid)) delete sealedRounds[rid];
+  });
+  applySkippedRoundsPolicy();
+  const open = getCurrentOpenRound();
+  if (open?.startsWith('G')) activeGroupRound = open;
+  if (open?.startsWith('KO')) activeKoRound = open;
+}
+
+function isRoundSealed(roundId) {
+  if (isRoundSkipped(roundId)) return true;
+  return !!sealedRounds[roundId];
+}
 
 function isRoundExpiredByTime(roundId) {
   const ids = getRoundMatchIds(roundId);
@@ -1861,6 +1924,7 @@ function applyRoundSealCore(roundId, snap, opts) {
 function autoSealExpiredRounds() {
   let changed = false;
   for (const roundId of ROUND_ORDER) {
+    if (isRoundSkipped(roundId)) continue;
     if (!canSealRoundByOrder(roundId)) continue;
     if (isRoundSealed(roundId)) continue;
     if (!isRoundExpiredByTime(roundId)) continue;
@@ -1941,6 +2005,7 @@ function sealedScore(scores, id) {
 }
 
 function calcRoundPoints(roundId) {
+  if (isRoundSkipped(roundId) || sealedRounds[roundId]?.skipped) return { points: 0, details: [] };
   const s = sealedRounds[roundId];
   if (!s) return { points: 0, details: [] };
   let points = 0;
@@ -1973,6 +2038,10 @@ function calcRoundPoints(roundId) {
 }
 
 function calcTotalPoints() {
+  return withSealedSnapshot(getEffectiveSealedRounds(), () => calcTotalPointsCore());
+}
+
+function calcTotalPointsCore() {
   let total = 0;
   const byRound = {};
   ROUND_ORDER.forEach(rid => {
@@ -2250,8 +2319,9 @@ function renderSealBars() {
     const sealed = isRoundSealed(roundId);
     const pts = sealed ? calcRoundPoints(roundId).points : 0;
     if (sealed) {
+      const skipNote = (sealedRounds[roundId]?.skipped || isRoundSkipped(roundId)) ? ' · ' + t('seal_skipped_note') : '';
       const autoNote = sealedRounds[roundId]?.autoSealed ? ' ' + t('seal_auto_note') : '';
-      return `<span class="hint">${t('seal_locked', { round: roundLabel(roundId), pts })}${autoNote}</span>`;
+      return `<span class="hint">${t('seal_locked', { round: roundLabel(roundId), pts })}${skipNote}${autoNote}</span>`;
     }
     const hint = `<span class="hint">${t('seal_active', { round: roundLabel(roundId) })}${missing ? t('seal_missing', { n: missing }) : t('seal_ready')}</span>`;
     if (!withButton) return hint;
@@ -2585,7 +2655,7 @@ function validateSealedSequence(sealed) {
 }
 
 function mergeCouponSealed(parsed) {
-  const incoming = parsed.data.sealedRounds || {};
+  const incoming = normalizeSealedForPolicy(parsed.data.sealedRounds || {});
   if (parsed.type === 'cumulative' || parsed.type === 'full') {
     const err = validateSealedSequence(incoming);
     if (err) throw new Error(err);
@@ -2595,7 +2665,7 @@ function mergeCouponSealed(parsed) {
   if (!rid) throw new Error('bad round id');
   const ridIdx = ROUND_ORDER.indexOf(rid);
   if (ridIdx < 0) throw new Error('unknown round');
-  const merged = { ...sealedRounds };
+  const merged = normalizeSealedForPolicy({ ...sealedRounds });
   for (let i = 0; i < ridIdx; i++) {
     if (!merged[ROUND_ORDER[i]] && !incoming[ROUND_ORDER[i]]) {
       throw new Error(`Спочатку завантаж купон за «${ROUNDS[ROUND_ORDER[i]].name}»`);
@@ -3267,6 +3337,10 @@ function confirmSealProceed() {
 }
 
 function validateSealPreconditions(roundId) {
+  if (isRoundSkipped(roundId)) {
+    alert(t('alert_round_skipped', { round: roundLabel(roundId) }));
+    return false;
+  }
   const missing = countMissingInRound(roundId);
   if (missing) { alert(t('alert_fill_missing', { n: missing })); return false; }
   if (isRoundSealed(roundId)) {
@@ -3464,6 +3538,7 @@ function applyCouponGameState(parsed, opts) {
   if (hadLater && !opts.skipConfirm && !confirm(t('confirm_replace'))) return false;
 
   sealedRounds = merged;
+  applySkippedRoundsPolicy();
   scores = {};
   if (parsed.data.scores && parsed.type === 'full') scores = parsed.data.scores;
   if (parsed.data.koWinners) {
@@ -3517,9 +3592,20 @@ function importTicket() {
 
 function getSnapFromCoupon(parsed) {
   const incoming = parsed.data.sealedRounds || {};
-  const err = validateSealedSequence(incoming);
+  const snap = normalizeSealedForPolicy(incoming);
+  const err = validateSealedSequence(snap);
   if (err) throw new Error(err);
-  return incoming;
+  return snap;
+}
+
+function normalizeSealedForPolicy(sealed) {
+  const out = { ...sealed };
+  const maxIdx = ROUND_ORDER.reduce((mx, rid, i) => (out[rid] ? i : mx), -1);
+  ROUND_ORDER.forEach((rid, i) => {
+    if (isRoundSkipped(rid) && i <= maxIdx) out[rid] = buildSkippedRoundSnapshot(rid);
+  });
+  SKIPPED_ROUNDS.forEach(rid => { out[rid] = buildSkippedRoundSnapshot(rid); });
+  return out;
 }
 
 function leaderboardEntryFromCoupon(raw) {
@@ -3586,6 +3672,9 @@ function ensureLeaderboardModal() {
 }
 
 function buildLeaderboardRoundHtml(snap, roundId) {
+  if (snap[roundId]?.skipped || isRoundSkipped(roundId)) {
+    return `<div class="lb-detail-round"><h4>${roundLabel(roundId)} — ${t('round_skipped_pts')}</h4><p style="font-size:.8rem;color:var(--muted)">${t('seal_skipped_note')}</p></div>`;
+  }
   const lines = withSealedSnapshot(snap, () => getRoundMatchLines(roundId));
   if (!lines.length) return '';
   const roundPts = withSealedSnapshot(snap, () => calcRoundPoints(roundId).points);
@@ -3710,7 +3799,7 @@ function loadData() {
 function resetAll() {
   if (!confirm(t('confirm_reset'))) return;
   sealedRounds = {}; scores = {};
-  activeGroupRound = 'G1'; activeKoRound = 'KO1'; lastTicket = '';
+  activeGroupRound = SKIPPED_ROUNDS.includes('G1') ? 'G2' : 'G1'; activeKoRound = 'KO1'; lastTicket = '';
   localStorage.removeItem('fifa2026predictor');
   Object.keys(localStorage).forEach(k => {
     if (k.startsWith('fifa2026syncmeta_')) localStorage.removeItem(k);
@@ -3771,6 +3860,7 @@ document.addEventListener('error', e => {
 
 initScores();
 loadData();
+applySkippedRoundsPolicy();
 const _open = getCurrentOpenRound();
 if (_open?.startsWith('G')) activeGroupRound = _open;
 if (_open?.startsWith('KO')) activeKoRound = _open;

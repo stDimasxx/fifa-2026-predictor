@@ -485,6 +485,10 @@
     if (typeof renderLeaderboardTable === 'function') {
       renderLeaderboardTable(mergeLeaderboardCodes());
     }
+    if (typeof applyCloudSealedFromLeaderboard === 'function') {
+      applyCloudSealedFromLeaderboard();
+      if (typeof renderAll === 'function') renderAll();
+    }
     return result;
   }
 
