@@ -769,6 +769,7 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
       <div id="leaderboard-status" style="font-size:.82rem;color:var(--accent);margin-top:.4rem"></div>
       </div>
     </details>
+    <div id="cloud-sync-status" style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem"></div>
     <div id="leaderboard-table-wrap"></div>
   </div>
 
@@ -778,6 +779,8 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
 </main>
 
 <script src="i18n.js"></script>
+<script src="sync-config.js"></script>
+<script src="sync.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 const TEAMS = {
@@ -1537,13 +1540,15 @@ function collectMatchPredictions(matchId) {
     const rid = matchId <= 72 ? 'G' + MATCHES.find(m => m.id === matchId)?.md : getKoRoundId(matchId);
     const p = rid && e.snap[rid]?.scores?.[matchId];
     if (!isPredFilled(p)) return;
+    if (!e.self && typeof canViewOthersPrediction === 'function' && !canViewOthersPrediction(matchId)) return;
     seen.add(e.name);
     rows.push({ name: e.name, pred: p, self: false });
   };
 
   (window._lbEntries || []).forEach(addEntry);
   if (seen.size <= 1) {
-    loadLeaderboardCodes().forEach(code => {
+    const codes = typeof mergeLeaderboardCodes === 'function' ? mergeLeaderboardCodes() : loadLeaderboardCodes();
+    codes.forEach(code => {
       try { addEntry(leaderboardEntryFromCoupon(code)); } catch (e) { /* skip */ }
     });
   }
@@ -1571,7 +1576,7 @@ function ensureMatchPredModal() {
 }
 
 function showMatchPredictions(matchId) {
-  if (!isMatchPredictionClosed(matchId)) return;
+  if (typeof isMatchBetsViewable === 'function' && !isMatchBetsViewable(matchId)) return;
   const modal = ensureMatchPredModal();
   const act = getMatchActual(matchId);
   document.getElementById('match-pred-title').textContent = getMatchTitle(matchId)
@@ -1660,6 +1665,7 @@ function applyStaticI18n() {
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === getLang());
   });
+  if (typeof renderCloudSyncStatus === 'function') renderCloudSyncStatus();
 }
 
 function renderHowTo() {
@@ -2766,7 +2772,7 @@ function renderGroups() {
       const act = getActual(m);
       const showCompare = pred && act;
       const locked = disp.actual || disp.locked || !canEditGroupMatch(m);
-      const clickable = isMatchPredictionClosed(m.id);
+      const clickable = typeof isMatchBetsViewable === 'function' ? isMatchBetsViewable(m.id) : isMatchPredictionClosed(m.id);
       const row = document.createElement('div');
       row.className = 'match-row' + (m.done ? ' done' : '') + (disp.locked ? ' locked-pred' : '') + (clickable ? ' match-clickable' : '');
       if (clickable) {
@@ -2879,7 +2885,7 @@ function renderKnockout() {
 
 function makeKoMatch(id, label, home, away) {
   const div = document.createElement('div');
-  const clickable = isMatchPredictionClosed(id);
+  const clickable = typeof isMatchBetsViewable === 'function' ? isMatchBetsViewable(id) : isMatchPredictionClosed(id);
   div.className = 'ko-match' + (clickable ? ' match-clickable' : '');
   if (clickable) {
     div.title = t('match_bets_title');
@@ -3033,11 +3039,13 @@ function renderScoreboard() {
     : t('breakdown_empty');
 }
 
-function sealRound(roundId) {
+async function sealRound(roundId) {
   const missing = countMissingInRound(roundId);
   if (missing) { alert(t('alert_fill_missing', { n: missing })); return; }
   if (isRoundSealed(roundId)) return;
-  if (!ensurePlayerNameBeforeSeal()) return;
+  if (typeof ensurePlayerAuthBeforeSeal === 'function') {
+    if (!ensurePlayerAuthBeforeSeal()) return;
+  } else if (!ensurePlayerNameBeforeSeal()) return;
   if (roundId.startsWith('KO') && !['G1','G2','G3'].every(isRoundSealed)) {
     alert(t('alert_groups_first')); return;
   }
@@ -3075,12 +3083,23 @@ function sealRound(roundId) {
   renderAll();
 
   const next = getCurrentOpenRound();
+  let extraMsg = '';
+  if (typeof syncSubmitRound === 'function' && isSyncEnabled()) {
+    const res = await syncSubmitRound(roundId, ticket);
+    if (res.ok) {
+      extraMsg = '\n\n' + (res.pendingApproval ? t('sync_submitted_pending') : t('sync_submitted'));
+      await refreshCloudLeaderboard();
+    } else if (!res.disabled) {
+      extraMsg = '\n\n' + t('sync_submit_fail', { msg: res.error || '?' });
+    }
+    renderCloudSyncStatus();
+  }
   alert(t('alert_seal_ok', {
     round: roundLabel(roundId),
     pts: roundPts,
     total: prevTotal + roundPts,
     next: next ? t('alert_seal_next', { round: roundLabel(next) }) : ''
-  }));
+  }) + extraMsg);
   printRoundCoupon(roundId);
   if (next?.startsWith('G')) activeGroupRound = next;
   if (next?.startsWith('KO')) { activeKoRound = next; document.querySelector('[data-tab=knockout]').click(); }
@@ -3178,6 +3197,10 @@ function leaderboardEntryFromCoupon(raw) {
   return { name, total, byRound, snap, code: parsed.code, rounds };
 }
 
+function getActiveLeaderboardCodes() {
+  return typeof mergeLeaderboardCodes === 'function' ? mergeLeaderboardCodes() : loadLeaderboardCodes();
+}
+
 function loadLeaderboardCodes() {
   try {
     const raw = localStorage.getItem('fifa2026leaderboard');
@@ -3189,14 +3212,17 @@ function saveLeaderboardCodes(codes) {
   localStorage.setItem('fifa2026leaderboard', JSON.stringify(codes));
 }
 
-function refreshLeaderboard() {
+async function refreshLeaderboard() {
+  if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
+    await refreshCloudLeaderboard();
+  }
   const textarea = document.getElementById('leaderboardInput');
   const existing = loadLeaderboardCodes();
   const newCoupons = extractAllCoupons(textarea.value || '');
   const allCodes = [...new Set([...existing, ...newCoupons])];
   saveLeaderboardCodes(allCodes);
   textarea.value = allCodes.join('\n\n');
-  renderLeaderboardTable(allCodes);
+  renderLeaderboardTable(getActiveLeaderboardCodes());
   if (newCoupons.length) {
     const status = document.getElementById('leaderboard-status');
     if (status) status.textContent = t('lb_status_added', { n: newCoupons.length, total: allCodes.length });
@@ -3223,7 +3249,7 @@ async function importLeaderboardPdfs(input) {
   }
   saveLeaderboardCodes(codes);
   document.getElementById('leaderboardInput').value = codes.join('\n\n');
-  renderLeaderboardTable(codes);
+  renderLeaderboardTable(getActiveLeaderboardCodes());
   if (added) alert(t('alert_lb_added', { n: added }));
   else alert(t('alert_lb_no_codes'));
 }
@@ -3278,19 +3304,24 @@ function buildLeaderboardRoundHtml(snap, roundId) {
   const lines = withSealedSnapshot(snap, () => getRoundMatchLines(roundId));
   if (!lines.length) return '';
   const roundPts = withSealedSnapshot(snap, () => calcRoundPoints(roundId).points);
-  const rows = lines.map(ln => {
+  const visible = lines.filter(ln => typeof canViewOthersPrediction !== 'function' || canViewOthersPrediction(ln.n));
+  const hiddenN = lines.length - visible.length;
+  const rows = visible.map(ln => {
     const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
     const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
     const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
     const ptsCls = ln.pts != null ? `pts-${ln.pts}` : '';
     return `<tr><td class="when">${ln.when || '—'}</td><td>${ln.label}</td><td>${predStr}</td><td>${resStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
   }).join('');
+  const hiddenNote = hiddenN > 0
+    ? `<p style="font-size:.72rem;color:var(--muted);margin:.35rem 0">${t('lb_hidden_preds', { n: hiddenN })}</p>`
+    : '';
   let extra = '';
   if (roundId === 'KO1') {
     const { adv } = withSealedSnapshot(snap, () => getThirdMapping());
     extra = `<p style="font-size:.72rem;color:var(--muted);margin:.35rem 0">${t('lb_third_short')} ${adv.map(x => `${x.g}: ${teamLabel(x.team)}`).join(' · ')}</p>`;
   }
-  return `<div class="lb-detail-round"><h4>${t('lb_round_pts', { round: roundLabel(roundId), pts: roundPts })}</h4>${extra}
+  return `<div class="lb-detail-round"><h4>${t('lb_round_pts', { round: roundLabel(roundId), pts: roundPts })}</h4>${hiddenNote}${extra}
     <div class="lb-detail-table-wrap"><table class="lb-detail-table"><tr><th>${t('lb_col_time')}</th><th>${t('lb_col_match')}</th><th>${t('lb_col_pred')}</th><th>${t('lb_col_res')}</th><th>${t('lb_col_pts')}</th></tr>${rows}</table></div></div>`;
 }
 
@@ -3364,7 +3395,8 @@ function renderAll() {
   renderHowTo();
   updateProgress();
   updatePlayerNameField();
-  renderLeaderboardTable(loadLeaderboardCodes());
+  if (typeof renderCloudSyncStatus === 'function') renderCloudSyncStatus();
+  renderLeaderboardTable(getActiveLeaderboardCodes());
 }
 
 function saveData(silent) {
@@ -3393,6 +3425,7 @@ function resetAll() {
   sealedRounds = {}; scores = {};
   activeGroupRound = 'G1'; activeKoRound = 'KO1'; lastTicket = '';
   localStorage.removeItem('fifa2026predictor');
+  if (typeof clearPlayerPin === 'function') clearPlayerPin();
   initScores();
   document.getElementById('ticketInput').value = '';
   document.getElementById('ticketOutput').value = '';
@@ -3454,14 +3487,24 @@ if (_open?.startsWith('KO')) activeKoRound = _open;
 document.getElementById('sync-status').textContent = t('sync_initial');
 renderAll();
 fetchResults(false);
+if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
+  refreshCloudLeaderboard();
+}
 
 setInterval(() => {
   if (document.hidden) return;
   renderGroups();
   renderKnockout();
   renderSealBars();
-  renderLeaderboardTable(loadLeaderboardCodes());
+  renderLeaderboardTable(getActiveLeaderboardCodes());
 }, 60000);
+
+setInterval(() => {
+  if (document.hidden) return;
+  if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
+    refreshCloudLeaderboard();
+  }
+}, 120000);
 </script>
 </body>
 </html>

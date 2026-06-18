@@ -86,7 +86,21 @@
       ko_penalty_pick: 'Проходить (нічия):', pred_word: 'прогноз', match_word: 'Матч',
       summary_title: '📋 Прогноз: {name}', summary_date: 'Дата: {date}', summary_groups: '🏁 Групи (топ-2)',
       summary_thirds: '🥉 Проходять 3-і місця', summary_champ: '🏆 Чемпіон', summary_third_place: '🥉 3-є місце:',
-      summary_pts: '⭐ Очки', summary_total: 'Всього: {total}', howto_title: '📖 Як грати'
+      summary_pts: '⭐ Очки', summary_total: 'Всього: {total}', howto_title: '📖 Як грати',
+      prompt_pin: 'Придумай PIN (4–12 символів)\n\nЗапамʼятай — потрібен при кожному закритті туру. Ніхто інший не зможе завантажити купон під твоїм імʼям.',
+      prompt_pin_confirm: 'Повтори PIN:',
+      alert_no_pin: 'Без PIN не можна синхронізувати з таблицею.',
+      alert_pin_mismatch: 'PIN не збігається — спробуй ще раз.',
+      sync_cloud_off: '☁️ Хмара вимкнена (локальний імпорт купонів)',
+      sync_cloud_ok: '☁️ {n} гравців · оновлено {time}',
+      sync_cloud_pending: '⏳ Очікує approve організатора',
+      sync_cloud_loading: '☁️ Оновлення таблиці…',
+      sync_cloud_fail: '☁️ Помилка хмари',
+      sync_submitted: 'Дані надіслано в таблицю.',
+      sync_submitted_pending: 'Надіслано! Організатор має підтвердити твій перший вхід — тоді зʼявишся в лідерах.',
+      sync_submit_fail: 'Не вдалося надіслати в таблицю: {msg}',
+      lb_hidden_preds: 'Приховано {n} майбутніх матчів (відкриються за 10 хв до старту)',
+      tag_click_bets_later: ' · ставки за 10 хв до старту'
     },
     en: {
       page_title: 'FIFA World Cup 2026 — Bracket Predictor',
@@ -172,7 +186,21 @@
       ko_penalty_pick: 'Advances (draw):', pred_word: 'pick', match_word: 'Match',
       summary_title: '📋 Prediction: {name}', summary_date: 'Date: {date}', summary_groups: '🏁 Groups (top 2)',
       summary_thirds: '🥉 Best third-place teams', summary_champ: '🏆 Champion', summary_third_place: '🥉 3rd place:',
-      summary_pts: '⭐ Points', summary_total: 'Total: {total}', howto_title: '📖 How to play'
+      summary_pts: '⭐ Points', summary_total: 'Total: {total}', howto_title: '📖 How to play',
+      prompt_pin: 'Choose a PIN (4–12 characters)\n\nYou\'ll need it each time you seal a round. Others can\'t upload a coupon under your name.',
+      prompt_pin_confirm: 'Confirm PIN:',
+      alert_no_pin: 'PIN is required for cloud sync.',
+      alert_pin_mismatch: 'PINs don\'t match — try again.',
+      sync_cloud_off: '☁️ Cloud off (local coupon import)',
+      sync_cloud_ok: '☁️ {n} players · updated {time}',
+      sync_cloud_pending: '⏳ Awaiting organizer approval',
+      sync_cloud_loading: '☁️ Updating leaderboard…',
+      sync_cloud_fail: '☁️ Cloud error',
+      sync_submitted: 'Synced to cloud table.',
+      sync_submitted_pending: 'Sent! Organizer must approve your first entry — then you appear on the leaderboard.',
+      sync_submit_fail: 'Cloud sync failed: {msg}',
+      lb_hidden_preds: '{n} future match(es) hidden (open 10 min before kickoff)',
+      tag_click_bets_later: ' · picks open 10 min before'
     },
     pl: {
       page_title: 'FIFA World Cup 2026 — Typy na mundial',
@@ -258,7 +286,21 @@
       ko_penalty_pick: 'Awansuje (remis):', pred_word: 'typ', match_word: 'Mecz',
       summary_title: '📋 Typy: {name}', summary_date: 'Data: {date}', summary_groups: '🏁 Grupy (top 2)',
       summary_thirds: '🥉 Awansują 3. miejsca', summary_champ: '🏆 Mistrz', summary_third_place: '🥉 3. miejsce:',
-      summary_pts: '⭐ Punkty', summary_total: 'Razem: {total}', howto_title: '📖 Jak grać'
+      summary_pts: '⭐ Punkty', summary_total: 'Razem: {total}', howto_title: '📖 Jak grać',
+      prompt_pin: 'Wymyśl PIN (4–12 znaków)\n\nBędzie potrzebny przy każdym zamknięciu tury. Nikt inny nie wczyta kuponu na twoje imię.',
+      prompt_pin_confirm: 'Powtórz PIN:',
+      alert_no_pin: 'PIN jest wymagany do synchronizacji.',
+      alert_pin_mismatch: 'PIN się nie zgadza — spróbuj ponownie.',
+      sync_cloud_off: '☁️ Chmura wyłączona (lokalny import)',
+      sync_cloud_ok: '☁️ {n} graczy · zaktualizowano {time}',
+      sync_cloud_pending: '⏳ Czeka na zatwierdzenie organizatora',
+      sync_cloud_loading: '☁️ Aktualizacja tabeli…',
+      sync_cloud_fail: '☁️ Błąd chmury',
+      sync_submitted: 'Wysłano do tabeli.',
+      sync_submitted_pending: 'Wysłano! Organizator musi zatwierdzić pierwsze wejście.',
+      sync_submit_fail: 'Nie udało się wysłać: {msg}',
+      lb_hidden_preds: 'Ukryto {n} przyszłych mecz(y) (otwarcie 10 min przed)',
+      tag_click_bets_later: ' · typy 10 min przed'
     }
   };
 
