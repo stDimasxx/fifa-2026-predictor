@@ -468,6 +468,21 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .coupon-upload-label:hover { border-color: var(--accent); background: var(--card-hover); }
 .coupon-upload-label input { display: none; }
 
+details.collapse-panel {
+  margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 12px;
+  background: var(--card); overflow: hidden;
+}
+details.collapse-panel > summary {
+  cursor: pointer; padding: .85rem 1.15rem; font-weight: 700; font-size: 1rem;
+  list-style: none; display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  user-select: none;
+}
+details.collapse-panel > summary::-webkit-details-marker { display: none; }
+details.collapse-panel > summary::after { content: '▸'; color: var(--muted); font-size: .85rem; flex-shrink: 0; }
+details.collapse-panel[open] > summary::after { content: '▾'; }
+details.collapse-panel > summary:hover { background: var(--card-hover); }
+details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
+
 .sync-bar {
   display: flex; flex-wrap: wrap; gap: .75rem; align-items: center;
   justify-content: space-between; padding: .85rem 1.25rem; margin-bottom: 1.25rem;
@@ -570,8 +585,9 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
     </div>
   </div>
 
-  <div class="ticket-panel">
-    <h3>🎫 Купон — продовжити гру</h3>
+  <details class="ticket-panel collapse-panel">
+    <summary>🎫 Купон — завантажити / продовжити гру</summary>
+    <div class="collapse-body">
     <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Прогноз закривається <strong>за 10 хв</strong> до старту (Варшава). На закритому матчі — <strong>клік</strong>, щоб побачити ставки (купони друзів — у «Лідери»). Перед новим туром — <strong>PDF-купон</strong> або «З коду внизу ↑».</p>
     <div id="import-status" class="import-status"></div>
     <div class="row" style="margin-bottom:.5rem">
@@ -589,7 +605,8 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
       <button onclick="copyTicket()">Копіювати код купона</button>
       <button onclick="printCumulativeCoupon()">📄 Друк накопичувального купона</button>
     </div>
-  </div>
+    </div>
+  </details>
 
   <div class="progress-bar">
     <div id="progress-text">Заповнено: 0 / 104 матчів</div>
@@ -619,8 +636,9 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
   </div>
 
   <div id="panel-leaderboard" class="panel">
-    <div class="ticket-panel" style="margin-bottom:1rem">
-      <h3>🏆 Таблиця лідерів</h3>
+    <details class="ticket-panel collapse-panel" style="margin-bottom:1rem">
+      <summary>📥 Імпорт купонів — таблиця лідерів</summary>
+      <div class="collapse-body">
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">Завантаж <strong>PDF</strong> або встав текст з купона. <strong>Натисни імʼя гравця</strong> — побачиш усі його прогнози по турах.</p>
       <label class="coupon-upload-label" style="margin-bottom:.5rem">
         📎 PDF купони друзів
@@ -632,7 +650,8 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
         <button onclick="clearLeaderboard()">Очистити</button>
       </div>
       <div id="leaderboard-status" style="font-size:.82rem;color:var(--accent);margin-top:.4rem"></div>
-    </div>
+      </div>
+    </details>
     <div id="leaderboard-table-wrap"></div>
   </div>
 </main>
@@ -1602,6 +1621,11 @@ function getKoWinnerFromScore(id, home, away) {
   return sc.adv || null;
 }
 
+function sealedScore(scores, id) {
+  if (!scores) return null;
+  return scores[id] ?? scores[String(id)] ?? null;
+}
+
 function calcRoundPoints(roundId) {
   const s = sealedRounds[roundId];
   if (!s) return { points: 0, details: [] };
@@ -1612,7 +1636,7 @@ function calcRoundPoints(roundId) {
   if (r.type === 'group') {
     getRoundMatchIds(roundId).forEach(id => {
       const m = MATCHES.find(x => x.id === id);
-      const pred = s.scores?.[id];
+      const pred = sealedScore(s.scores, id);
       const act = getActual(m);
       if (!pred || pred.h === '' || pred.a === '' || !act) return;
       const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
@@ -1621,7 +1645,7 @@ function calcRoundPoints(roundId) {
     });
   } else {
     for (let id = r.from; id <= r.to; id++) {
-      const pred = s.scores?.[id];
+      const pred = sealedScore(s.scores, id);
       const act = KO_ACTUAL[id];
       if (!pred || pred.h === '' || pred.a === '' || !act) continue;
       const teams = getKoTeamsForMatch(id, buildR32Teams());
@@ -1983,7 +2007,7 @@ function getRoundMatchLines(roundId) {
   const lines = [];
   if (r.type === 'group') {
     MATCHES.filter(m => m.md === r.md).forEach(m => {
-      const pred = sealedRounds[roundId]?.scores?.[m.id];
+      const pred = sealedScore(sealedRounds[roundId]?.scores, m.id);
       if (!pred || pred.h === '') return;
       const act = getActual(m);
       const pts = act ? scorePrediction(pred.h, pred.a, act.h, act.a) : null;
@@ -1992,7 +2016,7 @@ function getRoundMatchLines(roundId) {
   } else {
     const r32 = buildR32Teams();
     for (let id = r.from; id <= r.to; id++) {
-      const pred = sealedRounds[roundId]?.scores?.[id];
+      const pred = sealedScore(sealedRounds[roundId]?.scores, id);
       if (!pred || pred.h === '') continue;
       const teams = getKoTeamsForMatch(id, r32);
       const label = teams.h && teams.a ? `${teamLabel(teams.h)} — ${teamLabel(teams.a)}` : 'M' + id;
@@ -3014,7 +3038,7 @@ function renderLeaderboardTable(codes) {
   });
   window._lbEntries = entries;
   entries.sort((a, b) => b.total - a.total || b.rounds - a.rounds);
-  const cols = ROUND_ORDER.filter(rid => entries.some(e => e.byRound[rid] != null));
+  const cols = ROUND_ORDER.filter(rid => entries.some(e => e.snap[rid]));
   let html = '<table class="leaderboard-table"><tr><th>#</th><th>Гравець</th>';
   cols.forEach(rid => { html += `<th>${ROUNDS[rid].name.replace(' ', '<br>')}</th>`; });
   html += '<th>Тури</th><th class="total-col">Всього</th><th class="detail-col">👁</th></tr>';
@@ -3133,6 +3157,7 @@ function renderAll() {
   renderSummary();
   updateProgress();
   updatePlayerNameField();
+  renderLeaderboardTable(loadLeaderboardCodes());
 }
 
 function saveData(silent) {
@@ -3203,7 +3228,6 @@ const _open = getCurrentOpenRound();
 if (_open?.startsWith('G')) activeGroupRound = _open;
 if (_open?.startsWith('KO')) activeKoRound = _open;
 renderAll();
-renderLeaderboardTable(loadLeaderboardCodes());
 fetchResults(false);
 
 setInterval(() => {
@@ -3211,6 +3235,7 @@ setInterval(() => {
   renderGroups();
   renderKnockout();
   renderSealBars();
+  renderLeaderboardTable(loadLeaderboardCodes());
 }, 60000);
 </script>
 </body>
