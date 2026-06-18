@@ -60,53 +60,74 @@ header.hero {
   border-bottom: 2px solid transparent;
   border-image: linear-gradient(90deg, var(--magenta), var(--gold), var(--accent)) 1;
   box-shadow: 0 4px 40px rgba(0,0,0,.5);
-  transition: box-shadow .2s ease;
+  transition: box-shadow .35s cubic-bezier(.4, 0, .2, 1);
 }
 
 header.hero.header-compact {
   box-shadow: 0 2px 20px rgba(0,0,0,.55);
 }
 
-header.hero.header-compact .header-inner { padding: .45rem 1rem .55rem; }
-header.hero.header-compact .brand-icon { width: 34px; height: 34px; font-size: 1rem; box-shadow: none; }
-header.hero.header-compact .brand h1 { font-size: 1.25rem; }
-header.hero.header-compact .brand .sub { display: none; }
-header.hero.header-compact .tabs { margin-top: .45rem; gap: .35rem; }
-header.hero.header-compact .tab { padding: .38rem .75rem; font-size: .68rem; }
-header.hero.header-compact .toolbar input { min-width: 0; width: 7.5rem; padding: .4rem .6rem; font-size: .82rem; }
-header.hero.header-compact .toolbar button { padding: .4rem .55rem; font-size: .78rem; }
-
-@media (max-width: 600px) {
-  header.hero.header-compact .toolbar button { display: none; }
-  header.hero.header-compact .toolbar input { flex: 1; width: auto; max-width: none; }
+.header-inner {
+  max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 1rem;
+  transition: padding .38s cubic-bezier(.4, 0, .2, 1);
 }
 
-.header-inner { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 1rem; }
-
-.header-top { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; justify-content: space-between; }
-
-.brand { display: flex; align-items: center; gap: 1rem; }
+header.hero.header-compact .header-inner { padding: .45rem 1rem .55rem; }
 
 .brand-icon {
   width: 52px; height: 52px; border-radius: 50%;
   background: linear-gradient(135deg, var(--gold), #ff8c00);
   display: flex; align-items: center; justify-content: center;
   font-size: 1.6rem; box-shadow: 0 0 24px rgba(255,210,74,.35);
+  transition: width .38s cubic-bezier(.4, 0, .2, 1), height .38s cubic-bezier(.4, 0, .2, 1),
+    font-size .38s cubic-bezier(.4, 0, .2, 1), box-shadow .38s ease;
 }
+
+header.hero.header-compact .brand-icon { width: 34px; height: 34px; font-size: 1rem; box-shadow: none; }
 
 .brand h1 {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2.1rem; font-weight: 400; letter-spacing: .06em; line-height: 1;
+  transition: font-size .38s cubic-bezier(.4, 0, .2, 1);
 }
+
+header.hero.header-compact .brand h1 { font-size: 1.25rem; }
+
+.brand .sub {
+  color: var(--muted); font-size: .88rem; margin-top: .15rem; letter-spacing: .02em;
+  overflow: hidden; max-height: 3rem; opacity: 1;
+  transition: max-height .38s cubic-bezier(.4, 0, .2, 1), opacity .28s ease, margin-top .38s ease;
+}
+
+header.hero.header-compact .brand .sub {
+  max-height: 0; opacity: 0; margin-top: 0; pointer-events: none;
+}
+
+header.hero.header-compact .toolbar input {
+  min-width: 0; width: 7.5rem; padding: .4rem .6rem; font-size: .82rem;
+}
+
+header.hero.header-compact .toolbar button { padding: .4rem .55rem; font-size: .78rem; }
+
+.toolbar input[type=text],
+.toolbar button {
+  transition: padding .38s cubic-bezier(.4, 0, .2, 1), font-size .38s ease,
+    width .38s ease, max-width .38s ease, opacity .28s ease;
+}
+
+@media (max-width: 600px) {
+  header.hero.header-compact .toolbar .toolbar-auth-btn { display: none; }
+  header.hero.header-compact .toolbar input { flex: 1; width: auto; max-width: none; }
+}
+
+.header-top { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; justify-content: space-between; }
+
+.brand { display: flex; align-items: center; gap: 1rem; }
 
 .brand h1 span {
   background: linear-gradient(90deg, var(--gold), #fff8dc);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-.brand .sub {
-  color: var(--muted); font-size: .88rem; margin-top: .15rem; letter-spacing: .02em;
 }
 
 .brand .sub strong { color: var(--accent); font-weight: 600; }
@@ -149,11 +170,14 @@ button.gold {
 .tabs {
   display: flex; gap: .5rem; margin-top: 1.1rem; flex-wrap: wrap;
   padding-top: .25rem;
+  transition: margin-top .38s cubic-bezier(.4, 0, .2, 1), gap .38s ease;
 }
 
 .tab {
   padding: .6rem 1.2rem; border-radius: 999px; font-weight: 600;
   text-transform: uppercase; font-size: .78rem; letter-spacing: .06em;
+  transition: padding .38s cubic-bezier(.4, 0, .2, 1), font-size .38s ease,
+    background .18s, border-color .18s, transform .18s;
 }
 
 .tab.active {
@@ -161,6 +185,9 @@ button.gold {
   border-color: transparent; color: #fff;
   box-shadow: 0 4px 20px rgba(123,92,255,.4);
 }
+
+header.hero.header-compact .tabs { margin-top: .45rem; gap: .35rem; }
+header.hero.header-compact .tab { padding: .38rem .75rem; font-size: .68rem; }
 
 /* ── Main ── */
 main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow-anchor: none; }
@@ -205,6 +232,7 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
   padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
   display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between;
   box-shadow: var(--shadow); position: relative; overflow: hidden;
+  transition: padding .38s cubic-bezier(.4, 0, .2, 1), margin-bottom .38s cubic-bezier(.4, 0, .2, 1), gap .38s ease;
 }
 
 .scoreboard::before {
@@ -215,16 +243,26 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .scoreboard .score-label {
   font-size: .82rem; color: var(--muted); text-transform: uppercase;
   letter-spacing: .1em; font-weight: 600;
+  transition: font-size .38s cubic-bezier(.4, 0, .2, 1);
 }
 
 .scoreboard .total {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 3rem; font-weight: 400; color: var(--gold); line-height: 1;
   text-shadow: 0 0 30px rgba(255,210,74,.3);
+  transition: font-size .38s cubic-bezier(.4, 0, .2, 1);
 }
 
-.scoreboard .breakdown { font-size: .85rem; color: var(--muted); margin-top: .4rem; max-width: 600px; }
-.scoreboard .pts-legend { font-size: .72rem; color: var(--muted); margin-top: .35rem; }
+.scoreboard .breakdown {
+  font-size: .85rem; color: var(--muted); margin-top: .4rem; max-width: 600px;
+  overflow: hidden; max-height: 8rem; opacity: 1;
+  transition: max-height .38s cubic-bezier(.4, 0, .2, 1), opacity .28s ease, margin-top .38s ease;
+}
+.scoreboard .pts-legend {
+  font-size: .72rem; color: var(--muted); margin-top: .35rem;
+  overflow: hidden; max-height: 2rem; opacity: 1;
+  transition: max-height .38s cubic-bezier(.4, 0, .2, 1), opacity .28s ease, margin-top .38s ease;
+}
 
 .scoreboard.scoreboard-compact {
   padding: .55rem 1rem; margin-bottom: .75rem; gap: .5rem;
@@ -232,7 +270,9 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .scoreboard.scoreboard-compact .score-label { font-size: .7rem; }
 .scoreboard.scoreboard-compact .total { font-size: 2rem; }
 .scoreboard.scoreboard-compact .pts-legend,
-.scoreboard.scoreboard-compact .breakdown { display: none; }
+.scoreboard.scoreboard-compact .breakdown {
+  max-height: 0; opacity: 0; margin-top: 0; pointer-events: none;
+}
 
 /* ── Cards & panels ── */
 .progress-bar, .ticket-panel, .third-place-info, .summary-block {
@@ -671,6 +711,52 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
 .howto-section p, .howto-section li { font-size: .92rem; color: var(--text); }
 .howto-section ul { margin: .35rem 0 .35rem 1.2rem; }
 
+.scroll-top-btn {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  z-index: 95;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.14);
+  background: linear-gradient(135deg, rgba(28,22,64,.96), rgba(20,16,48,.98));
+  color: var(--gold);
+  font-size: 1.15rem;
+  line-height: 1;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0,0,0,.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(.94);
+  transition: opacity .28s ease, transform .28s cubic-bezier(.4, 0, .2, 1), visibility .28s,
+    background .18s, border-color .18s, box-shadow .18s;
+  pointer-events: none;
+  padding: 0;
+}
+.scroll-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+.scroll-top-btn:hover {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, rgba(40,32,80,.98), rgba(28,22,64,.98));
+  box-shadow: 0 6px 22px rgba(0,0,0,.5);
+  transform: translateY(-2px) scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  header.hero, .header-inner, .brand-icon, .brand h1, .brand .sub,
+  .tabs, .tab, .toolbar input[type=text], .toolbar button,
+  .scoreboard, .scoreboard .score-label, .scoreboard .total,
+  .scoreboard .breakdown, .scoreboard .pts-legend, .scroll-top-btn {
+    transition: none !important;
+  }
+}
+
 @media (max-width: 600px) {
   .brand h1 { font-size: 1.6rem; }
   .scoreboard .total { font-size: 2.2rem; }
@@ -697,8 +783,8 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
         <button type="button" class="lang-btn" data-lang="pl" onclick="setLang('pl')">PL</button>
       </div>
       <input type="text" id="playerName" placeholder="Твоє ім'я..." maxlength="40">
-      <button type="button" class="primary" id="btn-cloud-login" onclick="openCloudLoginDialog()" style="display:none" data-i18n="btn_cloud_login">Увійти</button>
-      <button type="button" id="btn-cloud-register" onclick="openCloudRegisterDialog()" style="display:none" data-i18n="btn_cloud_register">Створити акаунт</button>
+      <button type="button" class="primary toolbar-auth-btn" id="btn-cloud-login" onclick="openCloudLoginDialog()" style="display:none" data-i18n="btn_cloud_login">Увійти</button>
+      <button type="button" class="toolbar-auth-btn" id="btn-cloud-register" onclick="openCloudRegisterDialog()" style="display:none" data-i18n="btn_cloud_register">Створити акаунт</button>
       <span id="cloud-user-chip" style="display:none"></span>
       <button type="button" id="btn-cloud-logout" onclick="syncLogout()" style="display:none;font-size:.8rem" data-i18n="btn_cloud_logout">Вийти</button>
       <button class="gold" id="btn-coupon" onclick="exportPDF()" data-i18n="btn_coupon">📄 Видрукуй купон</button>
@@ -786,6 +872,8 @@ details.collapse-panel .collapse-body { padding: 0 1.15rem 1.1rem; }
     <div class="summary-block howto-block" id="howto-content"></div>
   </div>
 </main>
+
+<button type="button" id="scroll-top-btn" class="scroll-top-btn" onclick="scrollToTop()" aria-label="Вгору" title="Вгору">↑</button>
 
 <dialog id="login-choice-dialog" class="cloud-login-dialog">
   <h3 data-i18n="login_choice_title">Увійти</h3>
@@ -1738,7 +1826,17 @@ function applyStaticI18n() {
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === getLang());
   });
+  const topBtn = document.getElementById('scroll-top-btn');
+  if (topBtn) {
+    const label = t('scroll_top');
+    topBtn.setAttribute('aria-label', label);
+    topBtn.title = label;
+  }
   if (typeof renderCloudSyncStatus === 'function') renderCloudSyncStatus();
+}
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
 function renderHowTo() {
@@ -3849,18 +3947,29 @@ document.getElementById('playerName').addEventListener('input', () => saveData(t
 (function initCompactChrome() {
   const header = document.querySelector('header.hero');
   const scoreboard = document.getElementById('scoreboard');
+  const scrollTopBtn = document.getElementById('scroll-top-btn');
   let ticking = false;
   let compactOn = false;
   let frozen = false;
 
+  function updateScrollTopBtn() {
+    if (!scrollTopBtn) return;
+    scrollTopBtn.classList.toggle('visible', window.scrollY > 300);
+  }
+
   function apply(force) {
-    if (frozen && !force) return;
+    if (frozen && !force) {
+      updateScrollTopBtn();
+      return;
+    }
     const y = window.scrollY;
     const next = compactOn ? y > 24 : y > 88;
-    if (!force && next === compactOn) return;
-    compactOn = next;
-    header?.classList.toggle('header-compact', compactOn);
-    scoreboard?.classList.toggle('scoreboard-compact', compactOn);
+    if (force || next !== compactOn) {
+      compactOn = next;
+      header?.classList.toggle('header-compact', compactOn);
+      scoreboard?.classList.toggle('scoreboard-compact', compactOn);
+    }
+    updateScrollTopBtn();
   }
 
   window.setCompactChromeFrozen = (on) => {
@@ -3870,7 +3979,7 @@ document.getElementById('playerName').addEventListener('input', () => saveData(t
   };
 
   window.addEventListener('scroll', () => {
-    if (ticking || frozen) return;
+    if (ticking) return;
     ticking = true;
     requestAnimationFrame(() => { apply(false); ticking = false; });
   }, { passive: true });
