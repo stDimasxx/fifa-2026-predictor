@@ -10,4 +10,6 @@
 
 ## Оновлення
 
-Заміни `index.html` у репозиторії — GitHub Pages підхопить зміни за 1–2 хвилини.
+Заміни файли сайту (`index.html`, `i18n.js`, `sync.js`, `sync-config.js`) у гілці `experimental` — GitHub Pages підхопить зміни за 1–2 хвилини.
+
+Бекенд (Google Apps Script) зберігається локально в `apps-script/` і не входить у репозиторій.

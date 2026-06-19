@@ -1,2 +1,9 @@
-# Локальні нотатки для handoff між чатами — не в репозиторій
+# Локальні нотатки для handoff між чатами
 HANDOFF.md
+
+# Google Apps Script — деплоїться вручну в Google, не на GitHub Pages
+apps-script/
+
+# Внутрішні інструкції деплою / налаштування
+DEPLOY.md
+sync-config.example.js
