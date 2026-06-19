@@ -342,8 +342,15 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 
 .round-tab {
   background: var(--card); border: 1px solid var(--border);
-  color: var(--text); padding: .5rem 1rem; border-radius: 999px;
-  cursor: pointer; font-size: .85rem; font-weight: 500; transition: .18s;
+  color: var(--text); padding: .45rem .75rem; border-radius: 12px;
+  cursor: pointer; font-size: .82rem; font-weight: 600; transition: .18s;
+  display: inline-flex; flex-direction: column; align-items: center;
+  line-height: 1.15; gap: .12rem; text-align: center;
+}
+
+.round-tab-dates {
+  font-size: .64rem; font-weight: 500; color: var(--muted);
+  letter-spacing: .02em;
 }
 
 .round-tab.active {
@@ -351,8 +358,9 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
   border-color: transparent; font-weight: 600;
 }
 
+.round-tab.active .round-tab-dates { color: rgba(255,255,255,.78); }
+
 .round-tab.sealed { border-color: var(--accent); }
-.round-tab.sealed::after { content: ' ✓'; color: var(--accent); }
 
 .seal-bar {
   background: linear-gradient(135deg, var(--card2), var(--card));
@@ -1964,9 +1972,6 @@ function applyCloudSealedFromLeaderboard() {
     else if (!isRoundSkipped(rid)) delete sealedRounds[rid];
   });
   applySkippedRoundsPolicy();
-  const open = getCurrentOpenRound();
-  if (open?.startsWith('G')) activeGroupRound = open;
-  if (open?.startsWith('KO')) activeKoRound = open;
 }
 
 function isRoundSealed(roundId) {
@@ -2052,6 +2057,73 @@ function autoSealExpiredRounds() {
 
 function getCurrentOpenRound() {
   return ROUND_ORDER.find(r => !isRoundSealed(r)) || null;
+}
+
+function getRoundKickoffTimes(roundId) {
+  return getRoundMatchIds(roundId).map(getMatchKickoffMs).filter(t => t != null).sort((a, b) => a - b);
+}
+
+function roundHasStarted(roundId) {
+  const times = getRoundKickoffTimes(roundId);
+  return times.length > 0 && Date.now() >= times[0];
+}
+
+function getLiveRoundForKind(kind) {
+  const rounds = ROUND_ORDER.filter(r => r.startsWith(kind) && !isRoundSkipped(r));
+  let live = rounds[0];
+  for (const rid of rounds) {
+    if (roundHasStarted(rid)) live = rid;
+  }
+  return live;
+}
+
+function getLiveGroupRound() { return getLiveRoundForKind('G'); }
+function getLiveKoRound() { return getLiveRoundForKind('KO'); }
+
+function formatRoundDayShort(ms) {
+  const d = new Date(ms);
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  return `${dd}/${mm}`;
+}
+
+function getRoundDateRangeLabel(roundId) {
+  const times = getRoundKickoffTimes(roundId);
+  if (!times.length) return '';
+  const a = formatRoundDayShort(times[0]);
+  const b = formatRoundDayShort(times[times.length - 1]);
+  return a === b ? a : `${a}-${b}`;
+}
+
+function roundDisplayLabel(rid) {
+  const range = getRoundDateRangeLabel(rid);
+  return range ? `${roundLabel(rid)} · ${range}` : roundLabel(rid);
+}
+
+function setActiveGroupRound(rid) {
+  activeGroupRound = rid;
+  saveData(true);
+  renderAll();
+}
+
+function setActiveKoRound(rid) {
+  activeKoRound = rid;
+  saveData(true);
+  renderAll();
+}
+
+function ensureActiveViewRounds() {
+  const open = getCurrentOpenRound();
+  const liveG = getLiveGroupRound();
+  const liveKo = getLiveKoRound();
+  if (open?.startsWith('G') && activeGroupRound === open && !roundHasStarted(open)) {
+    activeGroupRound = liveG;
+    saveData(true);
+  }
+  if (open?.startsWith('KO') && activeKoRound === open && !roundHasStarted(open)) {
+    activeKoRound = liveKo;
+    saveData(true);
+  }
 }
 
 function isPredictionLocked(roundId) { return isRoundSealed(roundId); }
@@ -2393,25 +2465,29 @@ function buildR32Teams() {
   return teams;
 }
 
+function renderRoundTabButton(rid, active, onPick) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'round-tab' + (active ? ' active' : '') + (isRoundSealed(rid) ? ' sealed' : '');
+  const sealedMark = isRoundSealed(rid) ? ' ✓' : '';
+  const dates = getRoundDateRangeLabel(rid);
+  btn.innerHTML = `<span class="round-tab-name">${roundLabel(rid)}${sealedMark}</span>`
+    + (dates ? `<span class="round-tab-dates">${dates}</span>` : '');
+  btn.onclick = () => onPick(rid);
+  return btn;
+}
+
 function renderRoundTabs() {
   const gTabs = document.getElementById('group-round-tabs');
   gTabs.innerHTML = '';
   ['G1','G2','G3'].forEach(rid => {
-    const btn = document.createElement('button');
-    btn.className = 'round-tab' + (activeGroupRound === rid ? ' active' : '') + (isRoundSealed(rid) ? ' sealed' : '');
-    btn.textContent = roundLabel(rid);
-    btn.onclick = () => { activeGroupRound = rid; renderAll(); };
-    gTabs.appendChild(btn);
+    gTabs.appendChild(renderRoundTabButton(rid, activeGroupRound === rid, setActiveGroupRound));
   });
 
   const koTabs = document.getElementById('ko-round-tabs');
   koTabs.innerHTML = '';
   ['KO1','KO2','KO3','KO4','KO5'].forEach(rid => {
-    const btn = document.createElement('button');
-    btn.className = 'round-tab' + (activeKoRound === rid ? ' active' : '') + (isRoundSealed(rid) ? ' sealed' : '');
-    btn.textContent = roundLabel(rid);
-    btn.onclick = () => { activeKoRound = rid; renderAll(); };
-    koTabs.appendChild(btn);
+    koTabs.appendChild(renderRoundTabButton(rid, activeKoRound === rid, setActiveKoRound));
   });
 }
 
@@ -3103,7 +3179,7 @@ function renderGroups() {
     const stats = getGroupStats(g);
     const card = document.createElement('div');
     card.className = 'group-card';
-    card.innerHTML = `<div class="group-head" style="border-left:4px solid ${GROUP_COLORS[g]}"><span>${t('group_label')} <span class="letter">${g}</span></span><span class="round-label">${roundLabel(activeGroupRound)}</span></div>`;
+    card.innerHTML = `<div class="group-head" style="border-left:4px solid ${GROUP_COLORS[g]}"><span>${t('group_label')} <span class="letter">${g}</span></span><span class="round-label">${roundDisplayLabel(activeGroupRound)}</span></div>`;
     const table = document.createElement('table');
     table.className = 'standings';
     table.innerHTML = `<tr><th>#</th><th>${t('standings_team')}</th><th>${t('standings_played')}</th><th>${t('standings_pts')}</th><th>${t('standings_gf')}</th><th>${t('standings_ga')}</th><th>${t('standings_gd')}</th></tr>`;
@@ -3194,7 +3270,7 @@ function renderKnockout() {
   if (kr.from === 73) {
     const sec = document.createElement('div');
     sec.className = 'knockout-section';
-    sec.innerHTML = `<h2>${roundLabel(activeKoRound)}</h2>`;
+    sec.innerHTML = `<h2>${roundDisplayLabel(activeKoRound)}</h2>`;
     const grid = document.createElement('div');
     grid.className = 'ko-grid';
     R32.forEach(m => grid.appendChild(makeKoMatch(m.id, m.l, r32teams[m.id]?.h, r32teams[m.id]?.a)));
@@ -3205,7 +3281,7 @@ function renderKnockout() {
       || { round: kr.name, matches: [] };
     const sec = document.createElement('div');
     sec.className = 'knockout-section';
-    sec.innerHTML = `<h2>${roundLabel(activeKoRound)}</h2>`;
+    sec.innerHTML = `<h2>${roundDisplayLabel(activeKoRound)}</h2>`;
     const grid = document.createElement('div');
     grid.className = 'ko-grid';
     for (let id = kr.from; id <= kr.to; id++) {
@@ -3533,8 +3609,11 @@ async function executeSealRound(roundId) {
     next: next ? t('alert_seal_next', { round: roundLabel(next) }) : ''
   }) + extraMsg);
   printRoundCoupon(roundId);
-  if (next?.startsWith('G')) activeGroupRound = next;
-  if (next?.startsWith('KO')) { activeKoRound = next; document.querySelector('[data-tab=knockout]').click(); }
+  if (roundId.startsWith('G')) setActiveGroupRound(roundId);
+  else if (roundId.startsWith('KO')) {
+    setActiveKoRound(roundId);
+    document.querySelector('[data-tab=knockout]').click();
+  }
 }
 
 function buildTicket() {
@@ -3662,9 +3741,7 @@ function applyCouponGameState(parsed, opts) {
   if (name) document.getElementById('playerName').value = name;
 
   initScores();
-  const open = getCurrentOpenRound();
-  if (open?.startsWith('G')) activeGroupRound = open;
-  if (open?.startsWith('KO')) activeKoRound = open;
+  ensureActiveViewRounds();
 
   lastTicket = buildCumulativeTicketString();
   document.getElementById('ticketOutput').value = lastTicket;
@@ -4006,9 +4083,7 @@ document.addEventListener('error', e => {
 initScores();
 loadData();
 applySkippedRoundsPolicy();
-const _open = getCurrentOpenRound();
-if (_open?.startsWith('G')) activeGroupRound = _open;
-if (_open?.startsWith('KO')) activeKoRound = _open;
+ensureActiveViewRounds();
 document.getElementById('sync-status').textContent = t('sync_initial');
 renderAll();
 fetchResults(false);
