@@ -434,6 +434,8 @@ main { max-width: 1400px; margin: 0 auto; padding: 1.25rem 1.5rem 4rem; overflow
 .pts-2 { background: #3d4a18; color: #d4f070; }
 .pts-1 { background: #4a3d10; color: var(--gold); }
 .pts-0 { background: #4a1818; color: #ff8080; }
+.pts-bonus { background: #3d3010; color: var(--gold); border: 1px solid rgba(212,175,55,.35); margin-left: .12rem; }
+.lb-detail-table .pts-ko-bonus { color: #5dffb0; font-weight: 700; }
 
 .score-compare {
   display: flex; align-items: center; gap: .35rem; font-size: .88rem;
@@ -1757,9 +1759,11 @@ function showMatchPredictions(matchId) {
     body.innerHTML = `<div class="lb-detail-table-wrap"><table class="lb-detail-table"><tr><th>${t('lb_col_player')}</th><th>${t('lb_col_pred')}</th><th>${t('lb_col_pts')}</th></tr>${
       rows.map(r => {
         const predStr = r.pred.h + ':' + r.pred.a + (r.pred.adv && +r.pred.h === +r.pred.a ? ' → ' + teamLabel(r.pred.adv) : '');
-        const pts = act ? scorePrediction(r.pred.h, r.pred.a, act.h, act.a) : null;
-        const ptsStr = pts != null ? `+${pts}` : '—';
-        const ptsCls = pts != null ? `pts-${pts}` : '';
+        const scored = act
+          ? (matchId >= 73 ? scoreKoMatch(r.pred, act, matchId) : scoreGroupMatch(r.pred, act))
+          : null;
+        const ptsStr = scored != null ? `+${scored.total}` : '—';
+        const ptsCls = scored != null ? (scored.bonus ? 'pts-ko-bonus' : `pts-${scored.total}`) : '';
         return `<tr><td>${r.self ? '<strong>' + r.name + '</strong>' : r.name}</td><td>${predStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
       }).join('')
     }</table></div>`;
@@ -2208,10 +2212,11 @@ function calcRoundPoints(roundId) {
       const act = KO_ACTUAL[id];
       if (!pred || pred.h === '' || pred.a === '' || !act) continue;
       const teams = getKoTeamsForMatch(id, buildR32Teams());
-      const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
-      points += pts;
+      const scored = scoreKoMatch(pred, act, id);
+      points += scored.total;
       const lbl = teams.h && teams.a ? `${teamLabel(teams.h)} ${pred.h}:${pred.a} ${teamLabel(teams.a)}` : `M${id} ${pred.h}:${pred.a}`;
-      details.push({ id, label: lbl, actual: `${act.h}:${act.a}`, pts });
+      const bonusNote = scored.bonus ? ` (+1 ${teamLabel(pred.adv)})` : '';
+      details.push({ id, label: lbl, actual: `${act.h}:${act.a}${bonusNote}`, pts: scored.total });
     }
   }
   return { points, details };
@@ -2300,8 +2305,16 @@ async function fetchResults(manual) {
         if ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode)) {
           const swap = teams.h !== hCode;
           const fh = swap ? as : hs, fa = swap ? hs : as;
-          if (!KO_ACTUAL[id] || KO_ACTUAL[id].h !== fh || KO_ACTUAL[id].a !== fa) {
-            KO_ACTUAL[id] = { h: fh, a: fa };
+          let adv = null;
+          if (fh === fa) {
+            const winnerComp = comps.find(c => c.winner === true);
+            const wCode = winnerComp ? espnToCode(winnerComp.team?.abbreviation) : null;
+            if (wCode === teams.h || wCode === teams.a) adv = wCode;
+            else if (wCode) adv = wCode;
+          }
+          const prev = KO_ACTUAL[id];
+          if (!prev || prev.h !== fh || prev.a !== fa || prev.adv !== adv) {
+            KO_ACTUAL[id] = adv ? { h: fh, a: fa, adv } : { h: fh, a: fa };
             updated++;
           }
           break;
@@ -2465,6 +2478,101 @@ function buildR32Teams() {
   return teams;
 }
 
+let _koActualWinnersCache = { key: '', map: null };
+
+function getKoTeamsForMatchFromWinners(id, r32, winners) {
+  if (id >= 73 && id <= 88) return r32[id] || { h: null, a: null };
+  const m = findKoMatch(id);
+  if (!m) return { h: null, a: null };
+  return {
+    h: resolveKoRefActual(m.h, r32, winners),
+    a: resolveKoRefActual(m.a, r32, winners)
+  };
+}
+
+function resolveKoRefActual(ref, r32, winners) {
+  if (!ref || (!ref.startsWith('W') && !ref.startsWith('L'))) return null;
+  const id = +ref.slice(1);
+  if (ref.startsWith('W')) return winners[id] || null;
+  const teams = id >= 73 && id <= 88 ? (r32[id] || getKoTeamsForMatch(id, r32)) : getKoTeamsForMatchFromWinners(id, r32, winners);
+  const w = winners[id];
+  if (!w || !teams?.h) return null;
+  return w === teams.h ? teams.a : teams.h;
+}
+
+function resolveActualWinner(id, home, away) {
+  const act = KO_ACTUAL[id];
+  if (!act || !home || !away) return null;
+  const h = +act.h, a = +act.a;
+  if (h > a) return home;
+  if (a > h) return away;
+  return act.adv || null;
+}
+
+function inferKoAdvancerFromBracket(id, teams, winners, r32) {
+  const ref = 'W' + id;
+  const candidates = [teams.h, teams.a].filter(Boolean);
+  if (!candidates.length) return null;
+  for (let cid = 89; cid <= 104; cid++) {
+    const m = findKoMatch(cid);
+    if (!m || (m.h !== ref && m.a !== ref)) continue;
+    const childTeams = getKoTeamsForMatchFromWinners(cid, r32, winners);
+    const slotTeam = m.h === ref ? childTeams.h : childTeams.a;
+    if (slotTeam && candidates.includes(slotTeam)) return slotTeam;
+  }
+  return null;
+}
+
+function getKoActualWinnersMap() {
+  const key = JSON.stringify(KO_ACTUAL);
+  if (_koActualWinnersCache.key === key && _koActualWinnersCache.map) return _koActualWinnersCache.map;
+  const r32 = buildR32Teams();
+  const winners = {};
+  const teamsFor = id => getKoTeamsForMatchFromWinners(id, r32, winners);
+  for (let id = 73; id <= 104; id++) {
+    const teams = teamsFor(id);
+    const w = resolveActualWinner(id, teams.h, teams.a);
+    if (w) winners[id] = w;
+  }
+  for (let id = 73; id <= 104; id++) {
+    if (winners[id]) continue;
+    const act = KO_ACTUAL[id];
+    if (!act || +act.h !== +act.a) continue;
+    const inferred = inferKoAdvancerFromBracket(id, teamsFor(id), winners, r32);
+    if (inferred) winners[id] = inferred;
+  }
+  _koActualWinnersCache = { key, map: winners };
+  return winners;
+}
+
+function getKoActualAdvancer(matchId) {
+  return getKoActualWinnersMap()[matchId] || null;
+}
+
+function scoreGroupMatch(pred, act) {
+  const base = scorePrediction(pred.h, pred.a, act.h, act.a);
+  return { base, bonus: 0, total: base };
+}
+
+function scoreKoMatch(pred, act, matchId) {
+  const base = scorePrediction(pred.h, pred.a, act.h, act.a);
+  let bonus = 0;
+  if (+pred.h === +pred.a && pred.adv && +act.h === +act.a) {
+    const adv = getKoActualAdvancer(matchId);
+    if (adv && pred.adv === adv) bonus = 1;
+  }
+  return { base, bonus, total: base + bonus };
+}
+
+function formatPtsBadges(scored) {
+  if (!scored) return '';
+  const { base, bonus } = scored;
+  const cls = base === 3 ? 'pts-3' : base === 2 ? 'pts-2' : base === 1 ? 'pts-1' : 'pts-0';
+  let html = `<span class="pts-badge ${cls}">+${base}</span>`;
+  if (bonus) html += `<span class="pts-badge pts-bonus">+${bonus}</span>`;
+  return html;
+}
+
 function renderRoundTabButton(rid, active, onPick) {
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -2583,14 +2691,18 @@ function scoreCompareHtml(id, m) {
     const adv = pred.adv ? ` · → ${tShort(pred.adv)}` : '';
     return `<div class="score-compare"><span class="pred" style="text-decoration:none;opacity:1;color:var(--accent)">${pred.h}:${pred.a}</span><span style="font-size:.65rem;color:var(--muted)">${t('pred_word')}${adv}</span></div>`;
   }
-  const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
+  const isKo = typeof id === 'number' && id >= 73;
+  const scored = isKo ? scoreKoMatch(pred, act, id) : scoreGroupMatch(pred, act);
+  const pts = scored.base;
   const cls = pts === 3 || pts === 2 ? 'good' : pts === 1 ? 'ok' : 'miss';
   const adv = pred.adv && +pred.h === +pred.a ? ` <span style="font-size:.65rem;color:var(--muted)">(→ ${tShort(pred.adv)})</span>` : '';
+  const actAdv = isKo && +act.h === +act.a ? getKoActualAdvancer(id) : null;
+  const actAdvNote = actAdv ? ` <span style="font-size:.65rem;color:var(--muted)">(→ ${tShort(actAdv)})</span>` : '';
   return `<div class="score-compare">
     <span class="pred">${pred.h}:${pred.a}</span>
     <span class="arrow">→</span>
-    <span class="act ${cls}">${act.h}:${act.a}</span>
-    <span class="pts-badge pts-${pts}">+${pts}</span>${adv}
+    <span class="act ${cls}">${act.h}:${act.a}</span>${actAdvNote}
+    ${formatPtsBadges(scored)}${adv}
   </div>`;
 }
 
@@ -2613,8 +2725,11 @@ function getRoundMatchLines(roundId) {
       const teams = getKoTeamsForMatch(id, r32);
       const label = teams.h && teams.a ? `${teamLabel(teams.h)} — ${teamLabel(teams.a)}` : 'M' + id;
       const act = KO_ACTUAL[id] || null;
-      const pts = act ? scorePrediction(pred.h, pred.a, act.h, act.a) : null;
-      lines.push({ n: id, label, when: kickoffLabel(id, ''), pred, act, pts, adv: pred.adv });
+      const scored = act ? scoreKoMatch(pred, act, id) : null;
+      lines.push({
+        n: id, label, when: kickoffLabel(id, ''), pred, act,
+        pts: scored?.total ?? null, ptsBonus: scored?.bonus || 0, adv: pred.adv
+      });
     }
   }
   return lines;
@@ -3164,8 +3279,7 @@ function ptsBadgeKo(id) {
   const pred = sealedRounds[rid].scores?.[id];
   const act = KO_ACTUAL[id];
   if (!pred || !act) return '';
-  const pts = scorePrediction(pred.h, pred.a, act.h, act.a);
-  return ` <span class="pts-badge pts-${pts}">+${pts}</span>`;
+  return ' ' + formatPtsBadges(scoreKoMatch(pred, act, id));
 }
 
 function renderGroups() {
@@ -3878,7 +3992,7 @@ function buildLeaderboardRoundHtml(snap, roundId) {
     const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
     const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
     const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
-    const ptsCls = ln.pts != null ? `pts-${ln.pts}` : '';
+    const ptsCls = ln.pts != null ? (ln.ptsBonus ? 'pts-ko-bonus' : `pts-${ln.pts}`) : '';
     return `<tr><td class="when">${ln.when || '—'}</td><td>${ln.label}</td><td>${predStr}</td><td>${resStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
   }).join('');
   const hiddenNote = hiddenN > 0
