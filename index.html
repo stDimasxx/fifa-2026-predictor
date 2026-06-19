@@ -2888,7 +2888,11 @@ function withSealedSnapshot(snap, fn) {
 }
 
 function calcTotalPointsFromSnap(snap) {
-  return withSealedSnapshot(snap, () => calcTotalPoints());
+  return withSealedSnapshot(snap, () => calcTotalPointsCore());
+}
+
+function leaderboardRoundIds() {
+  return ROUND_ORDER.filter(rid => !isRoundSkipped(rid));
 }
 
 function buildRoundSectionHtml(roundId) {
@@ -3721,7 +3725,7 @@ function leaderboardEntryFromCoupon(raw) {
   const snap = getSnapFromCoupon(parsed);
   const { total, byRound } = calcTotalPointsFromSnap(snap);
   const name = parsed.data.name || parsed.data.playerName || t('placeholder_player_locked');
-  const rounds = ROUND_ORDER.filter(r => snap[r]).length;
+  const rounds = leaderboardRoundIds().filter(r => snap[r]).length;
   return { name, total, byRound, snap, code: parsed.code, rounds };
 }
 
@@ -3749,14 +3753,16 @@ function renderLeaderboardTable(codes) {
   });
   window._lbEntries = entries;
   entries.sort((a, b) => b.total - a.total || b.rounds - a.rounds);
-  const cols = ROUND_ORDER.filter(rid => entries.some(e => e.snap[rid]));
+  const lbRounds = leaderboardRoundIds();
+  const cols = lbRounds.filter(rid => entries.some(e => e.snap[rid]));
+  const maxRounds = lbRounds.length;
   let html = `<div class="leaderboard-wrap"><table class="leaderboard-table"><tr><th>#</th><th>${t('lb_col_player')}</th>`;
   cols.forEach(rid => { html += `<th>${roundLabel(rid).replace(/ /g, '<br>')}</th>`; });
   html += `<th>${t('lb_col_rounds')}</th><th class="total-col">${t('lb_col_total')}</th><th class="detail-col">👁</th></tr>`;
   entries.forEach((e, i) => {
     html += `<tr class="${i === 0 ? 'leader' : ''}"><td>${i + 1}</td><td class="name"><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})">${e.name}</button></td>`;
     cols.forEach(rid => { html += `<td>${e.byRound[rid] != null ? e.byRound[rid] : '—'}</td>`; });
-    html += `<td>${e.rounds}/8</td><td class="total-col">${e.total}</td><td><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})" title="Деталі прогнозів">👁</button></td></tr>`;
+    html += `<td>${e.rounds}/${maxRounds}</td><td class="total-col">${e.total}</td><td><button type="button" class="name-btn" onclick="showLeaderboardDetails(${i})" title="Деталі прогнозів">👁</button></td></tr>`;
   });
   html += '</table></div>';
   if (errors.length) html += `<p style="font-size:.75rem;color:#ff8a8a;margin-top:.5rem">${t('lb_read_fail', { n: errors.length })}</p>`;
@@ -3815,7 +3821,7 @@ function showLeaderboardDetails(index) {
   if (!entry) return;
   const modal = ensureLeaderboardModal();
   document.getElementById('lb-detail-title').textContent = t('lb_detail_title', { name: entry.name, total: entry.total });
-  const sealedIds = ROUND_ORDER.filter(rid => entry.snap[rid]);
+  const sealedIds = leaderboardRoundIds().filter(rid => entry.snap[rid]);
   const body = document.getElementById('lb-detail-body');
   body.innerHTML = sealedIds.map(rid => buildLeaderboardRoundHtml(entry.snap, rid)).join('')
     || `<p style="color:var(--muted)">${t('lb_no_preds')}</p>`;
