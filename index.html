@@ -1909,9 +1909,11 @@ function scorePrediction(ph, pa, ah, aa) {
   ph = +ph; pa = +pa; ah = +ah; aa = +aa;
   if (ph === ah && pa === aa) return 3;
   const pd = ph - pa, ad = ah - aa;
-  if (pd === ad) return 2;
-  const po = pd > 0 ? 'W' : pd < 0 ? 'L' : 'D';
-  const ao = ad > 0 ? 'W' : ad < 0 ? 'L' : 'D';
+  const predDraw = ph === pa;
+  const actDraw = ah === aa;
+  if (!predDraw && !actDraw && pd === ad) return 2;
+  const po = predDraw ? 'D' : pd > 0 ? 'W' : 'L';
+  const ao = actDraw ? 'D' : ad > 0 ? 'W' : 'L';
   return po === ao ? 1 : 0;
 }
 
