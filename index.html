@@ -2263,6 +2263,34 @@ function findMatchByTeams(home, away) {
   return null;
 }
 
+function espnNeedsRegularTimeScore(st) {
+  const name = String(st?.name || '');
+  const detail = String(st?.detail || st?.shortDetail || '').toUpperCase();
+  return /AET|PEN|SHOOTOUT|EXTRA/i.test(name) || /AET|PEN|SO\b/.test(detail);
+}
+
+function espnWinnerCode(comps) {
+  const winnerComp = comps.find(c => c.winner === true);
+  return winnerComp ? espnToCode(winnerComp.team?.abbreviation) : null;
+}
+
+async function espnRegularTimeFromLinescores(eventId, compId, homeComp, awayComp) {
+  async function rtGoals(competitorId) {
+    const url = `https://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.world/events/${eventId}/competitions/${compId}/competitors/${competitorId}/linescores`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const data = await res.json();
+    let rt = 0;
+    for (const it of data.items || []) {
+      if (it.period === 1 || it.period === 2) rt += +it.value || 0;
+    }
+    return rt;
+  }
+  const [h, a] = await Promise.all([rtGoals(homeComp.id), rtGoals(awayComp.id)]);
+  if (h == null || a == null || isNaN(h) || isNaN(a)) return null;
+  return { h, a };
+}
+
 async function fetchResults(manual) {
   const el = document.getElementById('sync-status');
   el.textContent = t('sync_loading');
@@ -2275,20 +2303,20 @@ async function fetchResults(manual) {
     let updated = 0;
     const events = data.events || [];
 
-    events.forEach(ev => {
+    for (const ev of events) {
       const comp = ev.competitions?.[0];
-      if (!comp) return;
+      if (!comp) continue;
       const st = comp.status?.type;
-      if (!st?.completed || st.state !== 'post') return;
+      if (!st?.completed || st.state !== 'post') continue;
       const comps = comp.competitors || [];
       const home = comps.find(c => c.homeAway === 'home');
       const away = comps.find(c => c.homeAway === 'away');
-      if (!home || !away) return;
+      if (!home || !away) continue;
       const hCode = espnToCode(home.team?.abbreviation);
       const aCode = espnToCode(away.team?.abbreviation);
-      if (!hCode || !aCode) return;
+      if (!hCode || !aCode) continue;
       let hs = +home.score, as = +away.score;
-      if (isNaN(hs) || isNaN(as)) return;
+      if (isNaN(hs) || isNaN(as)) continue;
 
       const found = findMatchByTeams(hCode, aCode);
       if (found) {
@@ -2298,21 +2326,27 @@ async function fetchResults(manual) {
           m.done = true; m.hs = hs; m.as = as;
           updated++;
         }
-        return;
+        continue;
       }
 
-      // Плей-оф: шукаємо серед відомих пар (коли з'являться в сітці)
+      // Плей-оф: рахунок за 90 хв (+ бонус за вихід після нічиї)
       for (let id = 73; id <= 104; id++) {
         const r32 = buildR32Teams();
         const teams = getKoTeamsForMatch(id, r32);
         if (!teams.h || !teams.a) continue;
         if ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode)) {
           const swap = teams.h !== hCode;
-          const fh = swap ? as : hs, fa = swap ? hs : as;
+          let fh = swap ? as : hs, fa = swap ? hs : as;
+          if (espnNeedsRegularTimeScore(st)) {
+            const rt = await espnRegularTimeFromLinescores(ev.id, comp.id, home, away);
+            if (rt) {
+              fh = swap ? rt.a : rt.h;
+              fa = swap ? rt.h : rt.a;
+            }
+          }
           let adv = null;
           if (fh === fa) {
-            const winnerComp = comps.find(c => c.winner === true);
-            const wCode = winnerComp ? espnToCode(winnerComp.team?.abbreviation) : null;
+            const wCode = espnWinnerCode(comps);
             if (wCode === teams.h || wCode === teams.a) adv = wCode;
             else if (wCode) adv = wCode;
           }
@@ -2324,11 +2358,12 @@ async function fetchResults(manual) {
           break;
         }
       }
-    });
+    }
 
     const now = new Date().toLocaleString(dateLocale());
     el.textContent = t('sync_ok', { time: now, n: updated });
     el.style.color = 'var(--accent)';
+    if (updated > 0) saveData(true);
     renderAll();
     if (manual && updated === 0) alert(t('sync_no_new'));
   } catch (e) {
@@ -2550,6 +2585,8 @@ function getKoActualWinnersMap() {
 }
 
 function getKoActualAdvancer(matchId) {
+  const act = KO_ACTUAL[matchId];
+  if (act && +act.h === +act.a && act.adv) return act.adv;
   return getKoActualWinnersMap()[matchId] || null;
 }
 
@@ -2575,6 +2612,16 @@ function formatPtsBadges(scored) {
   let html = `<span class="pts-badge ${cls}">+${base}</span>`;
   if (bonus) html += `<span class="pts-badge pts-bonus">+${bonus}</span>`;
   return html;
+}
+
+function formatMatchActualStr(act, matchId) {
+  if (!act) return '—';
+  let s = `${act.h}:${act.a}`;
+  if (matchId >= 73 && +act.h === +act.a) {
+    const adv = act.adv || getKoActualAdvancer(matchId);
+    if (adv) s += ' → ' + teamLabel(adv);
+  }
+  return s;
 }
 
 function renderRoundTabButton(rid, active, onPick) {
@@ -3098,7 +3145,7 @@ function buildRoundSectionHtml(roundId) {
   const lines = getRoundMatchLines(roundId);
   const rows = lines.map((ln, i) => {
     const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
-    const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
+    const resStr = formatMatchActualStr(ln.act, ln.n);
     const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
     return `<tr><td class="n">${i + 1}</td><td class="match">${ln.label}<div class="when">${ln.when || ''}</div></td><td class="pred">${predStr}</td><td class="res">${resStr}</td><td class="pts">${ptsStr}</td></tr>`;
   }).join('');
@@ -3994,7 +4041,7 @@ function buildLeaderboardRoundHtml(snap, roundId) {
   const hiddenN = lines.length - visible.length;
   const rows = visible.map(ln => {
     const predStr = ln.pred.h + ':' + ln.pred.a + (ln.adv && +ln.pred.h === +ln.pred.a ? ' → ' + teamLabel(ln.adv) : '');
-    const resStr = ln.act ? `${ln.act.h}:${ln.act.a}` : '—';
+    const resStr = formatMatchActualStr(ln.act, ln.n);
     const ptsStr = ln.pts != null ? `+${ln.pts}` : '—';
     const ptsCls = ln.pts != null ? (ln.ptsBonus ? 'pts-ko-bonus' : `pts-${ln.pts}`) : '';
     return `<tr><td class="when">${ln.when || '—'}</td><td>${ln.label}</td><td>${predStr}</td><td>${resStr}</td><td class="${ptsCls}">${ptsStr}</td></tr>`;
