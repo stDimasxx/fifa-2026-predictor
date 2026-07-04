@@ -2192,8 +2192,6 @@ function setScore(id, side, val) {
 
 function getKoWinnerFromScore(id, home, away) {
   if (!home || !away) return null;
-  const actualW = getKoActualWinnersMap()[id];
-  if (actualW) return actualW;
   const sc = getScore(id);
   if (sc.h === '' || sc.a === '' || sc.h == null || sc.a == null) return null;
   const h = +sc.h, a = +sc.a;
@@ -2345,33 +2343,55 @@ async function fetchResults(manual) {
         continue;
       }
 
-      // Плей-оф: рахунок за 90 хв (+ бонус за вихід після нічиї)
-      for (let id = 73; id <= 104; id++) {
-        const r32 = buildR32Teams();
-        const teams = getKoTeamsForMatch(id, r32);
-        if (!teams.h || !teams.a) continue;
-        if ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode)) {
-          const swap = teams.h !== hCode;
-          let fh = swap ? as : hs, fa = swap ? hs : as;
-          if (espnNeedsRegularTimeScore(st)) {
-            const rt = await espnRegularTimeFromLinescores(ev.id, comp.id, home, away);
-            if (rt) {
-              fh = swap ? rt.a : rt.h;
-              fa = swap ? rt.h : rt.a;
+    }
+
+    const koSyncRanges = [[73, 88], [89, 96], [97, 104]];
+    for (const [idMin, idMax] of koSyncRanges) {
+      _koActualWinnersCache = { key: '', map: null };
+      const r32 = buildR32Teams();
+      const winners = getKoActualWinnersMap();
+      for (const ev of events) {
+        const comp = ev.competitions?.[0];
+        if (!comp) continue;
+        const st = comp.status?.type;
+        if (!st?.completed || st.state !== 'post') continue;
+        const comps = comp.competitors || [];
+        const home = comps.find(c => c.homeAway === 'home');
+        const away = comps.find(c => c.homeAway === 'away');
+        if (!home || !away) continue;
+        const hCode = espnToCode(home.team?.abbreviation);
+        const aCode = espnToCode(away.team?.abbreviation);
+        if (!hCode || !aCode) continue;
+        if (findMatchByTeams(hCode, aCode)) continue;
+        let hs = +home.score, as = +away.score;
+        if (isNaN(hs) || isNaN(as)) continue;
+
+        for (let id = idMin; id <= idMax; id++) {
+          const teams = getKoTeamsForMatchFromWinners(id, r32, winners);
+          if (!teams.h || !teams.a) continue;
+          if ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode)) {
+            const swap = teams.h !== hCode;
+            let fh = swap ? as : hs, fa = swap ? hs : as;
+            if (espnNeedsRegularTimeScore(st)) {
+              const rt = await espnRegularTimeFromLinescores(ev.id, comp.id, home, away);
+              if (rt) {
+                fh = swap ? rt.a : rt.h;
+                fa = swap ? rt.h : rt.a;
+              }
             }
+            let adv = null;
+            if (fh === fa) {
+              const wCode = espnWinnerCode(comps);
+              if (wCode === teams.h || wCode === teams.a) adv = wCode;
+              else if (wCode) adv = wCode;
+            }
+            const prev = KO_ACTUAL[id];
+            if (!prev || prev.h !== fh || prev.a !== fa || prev.adv !== adv) {
+              KO_ACTUAL[id] = adv ? { h: fh, a: fa, adv } : { h: fh, a: fa };
+              updated++;
+            }
+            break;
           }
-          let adv = null;
-          if (fh === fa) {
-            const wCode = espnWinnerCode(comps);
-            if (wCode === teams.h || wCode === teams.a) adv = wCode;
-            else if (wCode) adv = wCode;
-          }
-          const prev = KO_ACTUAL[id];
-          if (!prev || prev.h !== fh || prev.a !== fa || prev.adv !== adv) {
-            KO_ACTUAL[id] = adv ? { h: fh, a: fa, adv } : { h: fh, a: fa };
-            updated++;
-          }
-          break;
         }
       }
     }
@@ -2493,12 +2513,16 @@ function getKoTeam(ref, r32teams) {
   if (!ref) return null;
   if (ref.startsWith('W') || ref.startsWith('L')) {
     const id = +ref.slice(1);
-    const teams = getKoTeamsForMatch(id, r32teams);
-    const w = getKoWinnerFromScore(id, teams?.h, teams?.a);
-    if (ref.startsWith('L') && w && teams?.h && teams?.a) {
+    const winners = getKoActualWinnersMap();
+    const w = winners[id];
+    if (!w) return null;
+    if (ref.startsWith('L')) {
+      r32teams = r32teams || buildR32Teams();
+      const teams = getKoTeamsForMatchFromWinners(id, r32teams, winners);
+      if (!teams?.h || !teams?.a) return null;
       return w === teams.h ? teams.a : teams.h;
     }
-    return w || null;
+    return w;
   }
   return null;
 }
@@ -2564,20 +2588,6 @@ function resolveActualWinner(id, home, away) {
   return act.adv || null;
 }
 
-function inferKoAdvancerFromBracket(id, teams, winners, r32) {
-  const ref = 'W' + id;
-  const candidates = [teams.h, teams.a].filter(Boolean);
-  if (!candidates.length) return null;
-  for (let cid = 89; cid <= 104; cid++) {
-    const m = findKoMatch(cid);
-    if (!m || (m.h !== ref && m.a !== ref)) continue;
-    const childTeams = getKoTeamsForMatchFromWinners(cid, r32, winners);
-    const slotTeam = m.h === ref ? childTeams.h : childTeams.a;
-    if (slotTeam && candidates.includes(slotTeam)) return slotTeam;
-  }
-  return null;
-}
-
 function getKoActualWinnersMap() {
   const key = JSON.stringify(KO_ACTUAL);
   if (_koActualWinnersCache.key === key && _koActualWinnersCache.map) return _koActualWinnersCache.map;
@@ -2588,13 +2598,6 @@ function getKoActualWinnersMap() {
     const teams = teamsFor(id);
     const w = resolveActualWinner(id, teams.h, teams.a);
     if (w) winners[id] = w;
-  }
-  for (let id = 73; id <= 104; id++) {
-    if (winners[id]) continue;
-    const act = KO_ACTUAL[id];
-    if (!act || +act.h !== +act.a) continue;
-    const inferred = inferKoAdvancerFromBracket(id, teamsFor(id), winners, r32);
-    if (inferred) winners[id] = inferred;
   }
   _koActualWinnersCache = { key, map: winners };
   return winners;
@@ -3483,7 +3486,7 @@ function renderKnockout() {
     container.appendChild(sec);
   }
 
-  const champ = getKoWinnerFromScore(104, getKoTeamsForMatch(104, r32teams).h, getKoTeamsForMatch(104, r32teams).a);
+  const champ = getKoActualWinnersMap()[104];
   const champEl = document.getElementById('champion-name');
   if (champ) champEl.innerHTML = `${flagHtml(champ, 'lg')}<span>${teamLabel(champ)}</span>`;
   else champEl.textContent = '—';
@@ -3588,8 +3591,8 @@ function makeKoMatch(id, label, home, away) {
 
 function clearDownstream(id) {
   const deps = {
-    73:[89],74:[90],75:[89],76:[91],77:[90],78:[91],79:[92],80:[92],
-    81:[93],82:[93],83:[94],84:[94],85:[95],86:[95],87:[96],88:[96],
+    73:[90],74:[89],75:[90],76:[91],77:[89],78:[91],79:[92],80:[92],
+    81:[94],82:[94],83:[93],84:[93],85:[96],86:[95],87:[96],88:[95],
     89:[97],90:[97],91:[99],92:[99],93:[98],94:[98],95:[100],96:[100],
     97:[101],98:[101],99:[102],100:[102],101:[103,104],102:[103,104],103:[],104:[]
   };
@@ -4117,10 +4120,9 @@ function renderSummary() {
   html += `<h3 style="margin-top:1rem">${t('summary_thirds')}</h3><div style="display:flex;flex-wrap:wrap;gap:.4rem 1rem">${adv.map(x => `<span class="team-inline">${flagHtml(x.team,'sm')} ${x.g}: ${teamLabel(x.team)}</span>`).join('')}</div>`;
 
   const r32 = buildR32Teams();
-  const champ = getKoWinnerFromScore(104, getKoTeamsForMatch(104, r32).h, getKoTeamsForMatch(104, r32).a);
+  const champ = getKoActualWinnersMap()[104];
   if (champ) html += `<h3 style="margin-top:1rem">${t('summary_champ')}</h3><p style="font-size:1.3rem;color:var(--gold);display:flex;align-items:center;gap:.5rem">${flagHtml(champ,'lg')} ${teamLabel(champ)}</p>`;
-  const ko5teams = getKoTeamsForMatch(103, r32);
-  const third = getKoWinnerFromScore(103, ko5teams.h, ko5teams.a);
+  const third = getKoActualWinnersMap()[103];
   if (third) html += `<p style="display:flex;align-items:center;gap:.4rem">${t('summary_third_place')} ${flagHtml(third)} ${teamLabel(third)}</p>`;
 
   const { total, byRound } = calcTotalPoints();
