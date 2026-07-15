@@ -2345,11 +2345,9 @@ async function fetchResults(manual) {
 
     }
 
-    const koSyncRanges = [[73, 88], [89, 96], [97, 104]];
+    const koSyncRanges = [[73, 88], [89, 96], [97, 100], [101, 102], [103, 104]];
+    const r32 = buildR32Teams();
     for (const [idMin, idMax] of koSyncRanges) {
-      _koActualWinnersCache = { key: '', map: null };
-      const r32 = buildR32Teams();
-      const winners = getKoActualWinnersMap();
       for (const ev of events) {
         const comp = ev.competitions?.[0];
         if (!comp) continue;
@@ -2366,6 +2364,8 @@ async function fetchResults(manual) {
         let hs = +home.score, as = +away.score;
         if (isNaN(hs) || isNaN(as)) continue;
 
+        _koActualWinnersCache = { key: '', map: null };
+        const winners = getKoActualWinnersMap();
         for (let id = idMin; id <= idMax; id++) {
           const teams = getKoTeamsForMatchFromWinners(id, r32, winners);
           if (!teams.h || !teams.a) continue;
