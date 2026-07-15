@@ -491,6 +491,9 @@
     if (status && isSyncEnabled()) {
       status.textContent = typeof t === 'function' ? t('sync_cloud_loading') : 'Updating…';
     }
+    if (typeof fetchResults === 'function') {
+      try { await fetchResults(false); } catch (e) { console.error('fetchResults before leaderboard', e); }
+    }
     const result = await syncFetchLeaderboard();
     if (!result.ok && !result.disabled && status) {
       status.textContent = (typeof t === 'function' ? t('sync_cloud_fail') : 'Cloud error') + ': ' + (result.error || '');

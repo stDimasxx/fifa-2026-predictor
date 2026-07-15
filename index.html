@@ -2352,6 +2352,7 @@ async function applyEspnScoreToKoMatch(id, teams, parsed) {
   const prev = KO_ACTUAL[id];
   if (prev && prev.h === fh && prev.a === fa && prev.adv === adv) return false;
   KO_ACTUAL[id] = adv ? { h: fh, a: fa, adv } : { h: fh, a: fa };
+  _koActualWinnersCache = { key: '', map: null };
   return true;
 }
 
@@ -2366,7 +2367,10 @@ function findKoMatchIdsByKickoff(kickoffMs, toleranceMs) {
 }
 
 async function syncKnockoutFromEspn(events) {
-  const r32 = buildR32Teams();
+  for (let id = 73; id <= 104; id++) delete KO_ACTUAL[id];
+  _koActualWinnersCache = { key: '', map: null };
+
+  const r32 = buildR32TeamsFromActuals();
   let updated = 0;
   const koEvents = events.map(parseEspnKoEvent).filter(Boolean);
   const matchedKeys = new Set();
@@ -2453,13 +2457,15 @@ async function fetchResults(manual) {
     const now = new Date().toLocaleString(dateLocale());
     el.textContent = t('sync_ok', { time: now, n: updated });
     el.style.color = 'var(--accent)';
-    if (updated > 0) saveData(true);
+    saveData(true);
     renderAll();
     if (manual && updated === 0) alert(t('sync_no_new'));
+    return updated;
   } catch (e) {
     el.textContent = t('sync_fail');
     el.style.color = '#ff8a8a';
     if (manual) alert(t('alert_sync_error', { msg: e.message }));
+    return 0;
   }
 }
 
@@ -2473,6 +2479,76 @@ function getMatchScoreForStandings(m) {
   const sc = scores[m.id];
   if (sc && sc.h !== '' && sc.a !== '') return { h: +sc.h, a: +sc.a };
   return null;
+}
+
+function getMatchScoreForStandingsActual(m) {
+  if (m.done && m.hs != null && m.as != null) return { h: m.hs, a: m.as };
+  return null;
+}
+
+function getGroupStatsActual(g) {
+  const teams = GROUPS[g];
+  const stats = {};
+  teams.forEach(tc => stats[tc] = { pts: 0, gf: 0, ga: 0, gd: 0, played: 0, h2h: {} });
+  MATCHES.filter(m => m.g === g).forEach(m => {
+    const sc = getMatchScoreForStandingsActual(m);
+    if (!sc) return;
+    const h = sc.h, a = sc.a;
+    stats[m.h].played++; stats[m.a].played++;
+    stats[m.h].gf += h; stats[m.h].ga += a;
+    stats[m.a].gf += a; stats[m.a].ga += h;
+    if (h > a) { stats[m.h].pts += 3; stats[m.h].h2h[m.a] = (stats[m.h].h2h[m.a] || 0) + 3; }
+    else if (a > h) { stats[m.a].pts += 3; stats[m.a].h2h[m.h] = (stats[m.a].h2h[m.h] || 0) + 3; }
+    else { stats[m.h].pts++; stats[m.a].pts++; stats[m.h].h2h[m.a] = (stats[m.h].h2h[m.a] || 0) + 1; stats[m.a].h2h[m.h] = (stats[m.a].h2h[m.h] || 0) + 1; }
+  });
+  Object.values(stats).forEach(s => s.gd = s.gf - s.ga);
+  return stats;
+}
+
+function getStandingsActual(g) {
+  const stats = getGroupStatsActual(g);
+  return [...GROUPS[g]].sort((a, b) => compareTeams(a, b, stats, GROUPS[g]));
+}
+
+function getThirdMappingFromActuals() {
+  const thirds = [];
+  'ABCDEFGHIJKL'.split('').forEach(g => {
+    const st = getStandingsActual(g);
+    if (!st[2]) return;
+    thirds.push({ g, team: st[2], stats: getGroupStatsActual(g)[st[2]] });
+  });
+  thirds.sort((a, b) => {
+    if (a.stats.pts !== b.stats.pts) return b.stats.pts - a.stats.pts;
+    if (a.stats.gd !== b.stats.gd) return b.stats.gd - a.stats.gd;
+    if (a.stats.gf !== b.stats.gf) return b.stats.gf - a.stats.gf;
+    return (TEAMS[a.team]?.r || 99) - (TEAMS[b.team]?.r || 99);
+  });
+  const adv = thirds.slice(0, 8);
+  const key = adv.map(x => x.g).sort().join('');
+  const slots = ANNEX[key];
+  const map = {};
+  if (slots) {
+    THIRD_SLOTS.forEach((slot, i) => {
+      const grp = slots[i];
+      const entry = adv.find(x => x.g === grp);
+      if (entry) map[slot] = entry.team;
+    });
+  }
+  return { map, adv, key };
+}
+
+function buildR32TeamsFromActuals() {
+  const standings = {};
+  'ABCDEFGHIJKL'.split('').forEach(g => standings[g] = getStandingsActual(g));
+  const { map } = getThirdMappingFromActuals();
+  const teams = {};
+  R32.forEach(m => {
+    teams[m.id] = {
+      h: resolveSlot(m.h, standings, map),
+      a: resolveSlot(m.a, standings, map)
+    };
+  });
+  return teams;
 }
 
 function getGroupStats(g) {
@@ -2645,7 +2721,7 @@ function resolveActualWinner(id, home, away) {
 function getKoActualWinnersMap() {
   const key = JSON.stringify(KO_ACTUAL);
   if (_koActualWinnersCache.key === key && _koActualWinnersCache.map) return _koActualWinnersCache.map;
-  const r32 = buildR32Teams();
+  const r32 = buildR32TeamsFromActuals();
   const winners = {};
   const teamsFor = id => getKoTeamsForMatchFromWinners(id, r32, winners);
   for (let id = 73; id <= 104; id++) {
@@ -4325,10 +4401,17 @@ syncActiveRoundsToLive();
 document.getElementById('sync-status').textContent = t('sync_initial');
 renderAll();
 focusLivePanel();
-fetchResults(false);
-if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
-  refreshCloudLeaderboard();
-}
+
+(async function boot() {
+  try {
+    await fetchResults(false);
+    if (typeof refreshCloudLeaderboard === 'function' && isSyncEnabled()) {
+      await refreshCloudLeaderboard();
+    }
+  } catch (e) {
+    console.error('boot sync failed', e);
+  }
+})();
 
 setInterval(() => {
   if (document.hidden) return;
