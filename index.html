@@ -2280,7 +2280,7 @@ function findMatchByTeams(home, away) {
 function espnNeedsRegularTimeScore(st) {
   const name = String(st?.name || '');
   const detail = String(st?.detail || st?.shortDetail || '').toUpperCase();
-  return /AET|PEN|SHOOTOUT|EXTRA/i.test(name) || /AET|PEN|SO\b/.test(detail);
+  return /AET|PEN|SHOOTOUT|EXTRA/i.test(name) || /AET|PEN|SO\b|PENS/.test(detail);
 }
 
 function espnWinnerCode(comps) {
@@ -2303,6 +2303,109 @@ async function espnRegularTimeFromLinescores(eventId, compId, homeComp, awayComp
   const [h, a] = await Promise.all([rtGoals(homeComp.id), rtGoals(awayComp.id)]);
   if (h == null || a == null || isNaN(h) || isNaN(a)) return null;
   return { h, a };
+}
+
+function parseEspnKoEvent(ev) {
+  const comp = ev.competitions?.[0];
+  if (!comp) return null;
+  const st = comp.status?.type;
+  if (!st?.completed || st.state !== 'post') return null;
+  const comps = comp.competitors || [];
+  const home = comps.find(c => c.homeAway === 'home');
+  const away = comps.find(c => c.homeAway === 'away');
+  if (!home || !away) return null;
+  const hCode = espnToCode(home.team?.abbreviation);
+  const aCode = espnToCode(away.team?.abbreviation);
+  if (!hCode || !aCode) return null;
+  if (findMatchByTeams(hCode, aCode)) return null;
+  const hs = +home.score, as = +away.score;
+  if (isNaN(hs) || isNaN(as)) return null;
+  return {
+    ev, comp, st, home, away, comps, hCode, aCode, hs, as,
+    key: String(ev.id),
+    kickoffMs: Date.parse(ev.date || comp.date)
+  };
+}
+
+function koTeamsMatchEvent(teams, hCode, aCode) {
+  return teams?.h && teams?.a
+    && ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode));
+}
+
+async function applyEspnScoreToKoMatch(id, teams, parsed) {
+  const { st, home, away, comps, hCode, hs, as, ev, comp } = parsed;
+  const swap = teams.h !== hCode;
+  let fh = swap ? as : hs, fa = swap ? hs : as;
+  if (espnNeedsRegularTimeScore(st)) {
+    const rt = await espnRegularTimeFromLinescores(ev.id, comp.id, home, away);
+    if (rt) {
+      fh = swap ? rt.a : rt.h;
+      fa = swap ? rt.h : rt.a;
+    }
+  }
+  let adv = null;
+  if (fh === fa) {
+    const wCode = espnWinnerCode(comps);
+    if (wCode === teams.h || wCode === teams.a) adv = wCode;
+    else if (wCode) adv = wCode;
+  }
+  const prev = KO_ACTUAL[id];
+  if (prev && prev.h === fh && prev.a === fa && prev.adv === adv) return false;
+  KO_ACTUAL[id] = adv ? { h: fh, a: fa, adv } : { h: fh, a: fa };
+  return true;
+}
+
+function findKoMatchIdsByKickoff(kickoffMs, toleranceMs) {
+  const hits = [];
+  if (kickoffMs == null || isNaN(kickoffMs)) return hits;
+  for (let id = 73; id <= 104; id++) {
+    const ms = getMatchKickoffMs(id);
+    if (ms != null && Math.abs(ms - kickoffMs) <= toleranceMs) hits.push(id);
+  }
+  return hits;
+}
+
+async function syncKnockoutFromEspn(events) {
+  const r32 = buildR32Teams();
+  let updated = 0;
+  const koEvents = events.map(parseEspnKoEvent).filter(Boolean);
+  const matchedKeys = new Set();
+
+  // Проходимо M73→M104 по порядку, щоб кожен наступний раунд бачив переможців попереднього
+  for (let id = 73; id <= 104; id++) {
+    _koActualWinnersCache = { key: '', map: null };
+    const winners = getKoActualWinnersMap();
+    const teams = getKoTeamsForMatchFromWinners(id, r32, winners);
+    if (!teams.h || !teams.a) continue;
+
+    for (const parsed of koEvents) {
+      if (matchedKeys.has(parsed.key)) continue;
+      if (!koTeamsMatchEvent(teams, parsed.hCode, parsed.aCode)) continue;
+      if (await applyEspnScoreToKoMatch(id, teams, parsed)) updated++;
+      matchedKeys.add(parsed.key);
+      break;
+    }
+  }
+
+  // Запасний варіант: час kickoff + пара команд (два півфінали одночасно)
+  for (const parsed of koEvents) {
+    if (matchedKeys.has(parsed.key)) continue;
+    const candidates = findKoMatchIdsByKickoff(parsed.kickoffMs, 2.5 * 3600 * 1000);
+    const pairHits = candidates.filter(id => {
+      _koActualWinnersCache = { key: '', map: null };
+      const teams = getKoTeamsForMatchFromWinners(id, r32, getKoActualWinnersMap());
+      return koTeamsMatchEvent(teams, parsed.hCode, parsed.aCode);
+    });
+    const id = pairHits.length === 1 ? pairHits[0] : null;
+    if (id == null) continue;
+    _koActualWinnersCache = { key: '', map: null };
+    const teams = getKoTeamsForMatchFromWinners(id, r32, getKoActualWinnersMap());
+    if (!koTeamsMatchEvent(teams, parsed.hCode, parsed.aCode)) continue;
+    if (await applyEspnScoreToKoMatch(id, teams, parsed)) updated++;
+    matchedKeys.add(parsed.key);
+  }
+
+  return updated;
 }
 
 async function fetchResults(manual) {
@@ -2345,56 +2448,7 @@ async function fetchResults(manual) {
 
     }
 
-    const koSyncRanges = [[73, 88], [89, 96], [97, 100], [101, 102], [103, 104]];
-    const r32 = buildR32Teams();
-    for (const [idMin, idMax] of koSyncRanges) {
-      for (const ev of events) {
-        const comp = ev.competitions?.[0];
-        if (!comp) continue;
-        const st = comp.status?.type;
-        if (!st?.completed || st.state !== 'post') continue;
-        const comps = comp.competitors || [];
-        const home = comps.find(c => c.homeAway === 'home');
-        const away = comps.find(c => c.homeAway === 'away');
-        if (!home || !away) continue;
-        const hCode = espnToCode(home.team?.abbreviation);
-        const aCode = espnToCode(away.team?.abbreviation);
-        if (!hCode || !aCode) continue;
-        if (findMatchByTeams(hCode, aCode)) continue;
-        let hs = +home.score, as = +away.score;
-        if (isNaN(hs) || isNaN(as)) continue;
-
-        _koActualWinnersCache = { key: '', map: null };
-        const winners = getKoActualWinnersMap();
-        for (let id = idMin; id <= idMax; id++) {
-          const teams = getKoTeamsForMatchFromWinners(id, r32, winners);
-          if (!teams.h || !teams.a) continue;
-          if ((teams.h === hCode && teams.a === aCode) || (teams.h === aCode && teams.a === hCode)) {
-            const swap = teams.h !== hCode;
-            let fh = swap ? as : hs, fa = swap ? hs : as;
-            if (espnNeedsRegularTimeScore(st)) {
-              const rt = await espnRegularTimeFromLinescores(ev.id, comp.id, home, away);
-              if (rt) {
-                fh = swap ? rt.a : rt.h;
-                fa = swap ? rt.h : rt.a;
-              }
-            }
-            let adv = null;
-            if (fh === fa) {
-              const wCode = espnWinnerCode(comps);
-              if (wCode === teams.h || wCode === teams.a) adv = wCode;
-              else if (wCode) adv = wCode;
-            }
-            const prev = KO_ACTUAL[id];
-            if (!prev || prev.h !== fh || prev.a !== fa || prev.adv !== adv) {
-              KO_ACTUAL[id] = adv ? { h: fh, a: fa, adv } : { h: fh, a: fa };
-              updated++;
-            }
-            break;
-          }
-        }
-      }
-    }
+    updated += await syncKnockoutFromEspn(events);
 
     const now = new Date().toLocaleString(dateLocale());
     el.textContent = t('sync_ok', { time: now, n: updated });
