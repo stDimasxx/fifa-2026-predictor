@@ -2412,17 +2412,27 @@ async function syncKnockoutFromEspn(events) {
   return updated;
 }
 
+const ESPN_SCOREBOARD_RANGES = ['20260611-20260624', '20260625-20260708', '20260709-20260719'];
+
+async function fetchEspnScoreboardEvents() {
+  const byId = new Map();
+  for (const dates of ESPN_SCOREBOARD_RANGES) {
+    const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=${dates}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    for (const ev of data.events || []) byId.set(String(ev.id), ev);
+  }
+  return [...byId.values()];
+}
+
 async function fetchResults(manual) {
   const el = document.getElementById('sync-status');
   el.textContent = t('sync_loading');
   el.style.color = 'var(--accent)';
   try {
-    const url = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260611-20260719';
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    const events = await fetchEspnScoreboardEvents();
     let updated = 0;
-    const events = data.events || [];
 
     for (const ev of events) {
       const comp = ev.competitions?.[0];
